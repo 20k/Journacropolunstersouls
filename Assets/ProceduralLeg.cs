@@ -19,9 +19,12 @@ public class ProceduralLeg : MonoBehaviour {
     private Transform upperLeg;
     private Transform lowerLeg;
 
-    private GameObject sphere = GameObject.Find("DebugSphere");
-    private GameObject sphere1 = GameObject.Find("DebugSphere1");
+    private GameObject sphere;
+    private GameObject sphere1;
 
+    /// <summary>
+    /// for debugging
+    /// </summary>
     private int whoAmI = -1;
 
 	// Use this for initialization
@@ -39,6 +42,16 @@ public class ProceduralLeg : MonoBehaviour {
     void Update()
     {
 
+    }
+
+    public void TogglePlant(int who)
+    {
+        isPlanted = !isPlanted;
+
+        if(isPlanted)
+        {
+            PlantFoot(who);
+        }
     }
 
     public void PlantFoot(int who)
@@ -66,11 +79,6 @@ public class ProceduralLeg : MonoBehaviour {
         plantPositionTip = footTip;
 
         whoAmI = who;
-
-        if(who == 3)
-        {
-            sphere.transform.position = plantPositionTip;
-        }
     }
 
     Vector3 nearestSkew(Vector3 p1, Vector3 p1d, Vector3 p2, Vector3 p2d)
@@ -166,11 +174,6 @@ public class ProceduralLeg : MonoBehaviour {
         ///why negative?
         Vector3 topPos = half + Mathf.Min(height, -5f) * d3;
 
-        if (whoAmI == 3)
-        {
-            sphere1.transform.position = topPos;
-        }
-
         Quaternion lookUpper = Quaternion.FromToRotation(dir * upperReference, topPos - rootTip);
         Quaternion lookLower = Quaternion.FromToRotation(lowerReference, topPos - requestedFootTip);
 
@@ -182,7 +185,6 @@ public class ProceduralLeg : MonoBehaviour {
     public void Tick (float ftime) {
         if (isPlanted)
         {
-            Debug.Log("Planted");
             IKPlantFoot();
             return;
         }

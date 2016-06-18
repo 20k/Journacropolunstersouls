@@ -2,6 +2,27 @@ using System;
 using UnityEngine;
 using UnityStandardAssets.CrossPlatformInput;
 
+class JMaths
+{
+    static public float AngleDiff(float a1, float a2)
+    {
+        a1 %= 2 * Mathf.PI;
+        a2 %= 2 * Mathf.PI;
+
+        float diff = a1 - a2;
+
+        float d1 = (a1 + 2f * (float)Math.PI) - a2;
+        float d2 = (a1 - 2f * (float)Math.PI) - a2;
+
+        if (Math.Abs(d1) < Math.Abs(diff))
+            diff = d1;
+        if (Math.Abs(d2) < Math.Abs(diff))
+            diff = d2;
+
+        return diff;
+    }
+}
+
 namespace JamesCamera.TestOverheadView
 {
     [Serializable]

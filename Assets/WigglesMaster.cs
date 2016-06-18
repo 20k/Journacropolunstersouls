@@ -8,6 +8,12 @@ public class WigglesMaster : MonoBehaviour {
 
     public Transform wiggles;
     public float spiderSpeed = 1.0f;
+    public float turnTimeSeconds = 0.5f;
+
+    bool isTurning = false;
+    float turnTimeFrac = 0f;
+    float desiredGlobalTurnAngle = 0f;
+    float startGlobalTurnAngle = 0f;
 
     List<ProceduralLeg> legs = new List<ProceduralLeg>();
 
@@ -50,22 +56,29 @@ public class WigglesMaster : MonoBehaviour {
 
     // Update is called once per frame
     void Update () {
-        bool toPlant = Input.GetKeyDown(KeyCode.T);
 
-        if(toPlant)
+        TickTurn(Time.deltaTime);
+
+        /*bool togglePlant = Input.GetKeyDown(KeyCode.T);
+
+        if (togglePlant)
         {
-            for(int i=0; i<legs.Count; i++)
+            for (int i = 0; i < legs.Count; i++)
             {
-                legs[i].PlantFoot(i);
-                legs[i].IKPlantFoot();
+                legs[i].TogglePlant(i);
             }
+        }*/
+
+        if(Input.GetKeyDown(KeyCode.R))
+        {
+            ExecuteTurn(90);
         }
 
         Vector2 input = getDebugInput() * spiderSpeed;
 
         Vector3 translate = new Vector3(input.x, 0, -input.y);
 
-        wiggles.transform.position += translate;
+        wiggles.position += translate;
 
         if (Mathf.Abs(input.y) < Mathf.Epsilon)
             return;
@@ -81,11 +94,49 @@ public class WigglesMaster : MonoBehaviour {
         {
             legs[i].Tick(Time.deltaTime * moveDir * getMult());
         }
+
 	}
 
-    void FixedUpdate()
+    void TickTurn(float ftime)
     {
-        
+        if (!isTurning)
+            return;
+
+        float globalY = wiggles.rotation.eulerAngles.y;
+
+        ///ie in a circle, the sensible kind of diff we want for angles that takes into account mod 2PI
+        float angleDiff = JMaths.AngleDiff(desiredGlobalTurnAngle, startGlobalTurnAngle);
+
+        float calcAngle = startGlobalTurnAngle * (1f - turnTimeFrac) + desiredGlobalTurnAngle * turnTimeFrac;
+
+        ///testing
+        Vector3 rot = wiggles.rotation.eulerAngles;
+        rot.y = calcAngle;
+
+        Quaternion nquat;
+        nquat = Quaternion.Euler(rot.x, rot.y, rot.z);
+
+        wiggles.localRotation = nquat;
+
+
+        turnTimeFrac += ftime / turnTimeSeconds;
+
+        if (turnTimeFrac >= 1f)
+            isTurning = false;
+    }
+
+    /// <summary>
+    /// dis gun be gud
+    /// </summary>
+    void ExecuteTurn(float desiredAngle)
+    {
+        if (isTurning)
+            return;
+
+        isTurning = true;
+        desiredGlobalTurnAngle = desiredAngle;
+        turnTimeFrac = 0;
+        startGlobalTurnAngle = wiggles.rotation.eulerAngles.y;
     }
 
     public void Register(ProceduralLeg leg)
