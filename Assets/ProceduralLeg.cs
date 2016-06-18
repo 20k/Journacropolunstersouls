@@ -22,6 +22,8 @@ public class ProceduralLeg : MonoBehaviour {
     private GameObject sphere;
     private GameObject sphere1;
 
+    Vector3 lowerBaseOffset;
+
     /// <summary>
     /// for debugging
     /// </summary>
@@ -35,9 +37,11 @@ public class ProceduralLeg : MonoBehaviour {
         upperLeg = this.gameObject.transform.GetChild(0);
         lowerLeg = this.gameObject.transform.GetChild(1);
 
+        lowerBaseOffset = lowerLeg.position - baseBody.position;
+
         sphere = GameObject.Find("DebugSphere");
         sphere1 = GameObject.Find("DebugSphere1");
-}
+    }
 
     void Update()
     {
@@ -57,16 +61,8 @@ public class ProceduralLeg : MonoBehaviour {
     public void PlantFoot(int who)
     {
         isPlanted = true;
-        //plantPosition = transform.position;
 
-        Vector3 upperPos = upperLeg.position;
         Vector3 lowerPos = lowerLeg.position;
-
-        Vector3 reference = new Vector3(1, 0, 0);
-
-        Quaternion uRot = upperLeg.rotation;
-
-        Vector3 upperDir = uRot * reference;
 
         Vector3 lowerReference = new Vector3(0, 1, 0);
 
@@ -132,10 +128,10 @@ public class ProceduralLeg : MonoBehaviour {
 
         Vector3 lowerDir = lowerLeg.rotation * lowerReference;
 
-        Vector3 skew1 = nearestSkew(upperPos, upperDir, lowerPos, lowerDir);
-        Vector3 skew2 = nearestSkew(lowerPos, lowerDir, upperPos, upperDir);
+        //Vector3 skew1 = nearestSkew(upperPos, upperDir, lowerPos, lowerDir);
+        //Vector3 skew2 = nearestSkew(lowerPos, lowerDir, upperPos, upperDir);
 
-        Vector3 avgTop = (skew1 + skew2) / 2f;
+        //Vector3 avgTop = (skew1 + skew2) / 2f;
 
         //upper is scale.x, lower is scale.y
 
@@ -178,13 +174,95 @@ public class ProceduralLeg : MonoBehaviour {
         Quaternion lookLower = Quaternion.FromToRotation(lowerReference, topPos - requestedFootTip);
 
         upperLeg.rotation = lookUpper;
-        lowerLeg.rotation = lookLower;
+        lowerLeg.rotation = lookLower * baseBody.rotation;
         lowerLeg.position = requestedFootTip + lookLower * (lowerReference * llength / 2);
+    }
+
+    bool ShouldMovePlanted()
+    {
+        if (!isPlanted)
+            return false;
+
+        Vector3 baseReference = new Vector3(0, 0, -1) * -side;
+
+        Vector3 baseForward = baseBody.rotation * baseReference;
+
+        Vector3 baseRight = Vector3.Cross(Vector3.up, baseForward);
+
+        float dir = side;
+
+        float ulength = upperLeg.localScale.x;
+
+        Vector3 upperPos = upperLeg.position;
+
+        Vector3 upperReference = new Vector3(1, 0, 0);
+
+        Quaternion uRot = upperLeg.rotation;
+
+        Vector3 upperDir = uRot * upperReference;
+
+        Vector3 rootTip = upperPos - dir * upperDir * ulength / 2;
+
+        Vector3 relFoot = (plantPositionTip - rootTip).normalized;
+
+        //Vector2 lRoot = new Vector2(rootTip.x, rootTip.z);
+        //Vector2 lFloor = new Vector2(plantPositionTip.x, plantPositionTip.z);
+
+        Vector2 lFoot = new Vector2(relFoot.x, relFoot.z);
+        Vector2 lBase = new Vector2(baseRight.x, baseRight.z);
+
+        float angle = Mathf.Acos(clamp(Vector2.Dot(lFoot, lBase), -1f, 1f));
+
+        angle = angle * Mathf.Rad2Deg;
+
+        Debug.Log("asdfsadf " + angle);
+
+        ///this whole function isn't quite correct somewhere :[
+        if(Mathf.Abs(angle) > walkSweepAngleDegrees*4)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    Vector3 getCurrentRestPosition()
+    {
+        Quaternion baseQuat = baseBody.rotation;
+
+        Vector3 disp = baseQuat * lowerBaseOffset;
+
+        return disp + baseBody.position;
+    }
+
+    /// <summary>
+    /// need to reset other bits too :[
+    /// </summary>
+    void updateFootPlantIfNecessary()
+    {
+        if (!ShouldMovePlanted())
+            return;
+
+        ///fix from here onwards :[
+        return;
+
+        Vector3 lowerPos = getCurrentRestPosition();
+
+        Vector3 lowerReference = new Vector3(0, 1, 0);
+
+        Vector3 lowerDir = lowerLeg.rotation * lowerReference;
+
+        float llength = lowerLeg.localScale.y;
+
+        Vector3 footTip = lowerPos - lowerDir * llength / 2;
+
+        plantPositionTip = footTip;
     }
 
     public void Tick (float ftime) {
         if (isPlanted)
         {
+            updateFootPlantIfNecessary();
             IKPlantFoot();
             return;
         }

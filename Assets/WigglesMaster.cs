@@ -59,7 +59,7 @@ public class WigglesMaster : MonoBehaviour {
 
         TickTurn(Time.deltaTime);
 
-        /*bool togglePlant = Input.GetKeyDown(KeyCode.T);
+        bool togglePlant = Input.GetKeyDown(KeyCode.T);
 
         if (togglePlant)
         {
@@ -67,7 +67,7 @@ public class WigglesMaster : MonoBehaviour {
             {
                 legs[i].TogglePlant(i);
             }
-        }*/
+        }
 
         if(Input.GetKeyDown(KeyCode.R))
         {
@@ -94,8 +94,15 @@ public class WigglesMaster : MonoBehaviour {
         {
             legs[i].Tick(Time.deltaTime * moveDir * getMult());
         }
-
 	}
+
+    void PlantAllFeet()
+    {
+        for(int i=0; i<legs.Count; i++)
+        {
+            legs[i].PlantFoot(i);
+        }
+    }
 
     void TickTurn(float ftime)
     {
