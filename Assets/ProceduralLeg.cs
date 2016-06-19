@@ -9,11 +9,16 @@ public class ProceduralLeg : MonoBehaviour {
     public float walkHeight = 1;
     public float side = 1; //1 is left, -1 is right
     public WigglesMaster legHub;
+    public ProceduralLeg offsetLeg;
 
     private float walkCycleFrac = 0f;
     private Vector3 offset;
     //private Vector3 plantPosition; //we're planted in the ground
+    private Vector3 oldPlantPositionTip;
     private Vector3 plantPositionTip;
+    private Vector3 nextPlantPositionTip;
+    private bool isTipTransitioning = false;
+    private float transitionFrac = 0;
     private bool isPlanted = false; //should we use dynamic, or leave the foot alone and only move when waked?
 
     private Transform upperLeg;
@@ -33,6 +38,26 @@ public class ProceduralLeg : MonoBehaviour {
     /// for debugging
     /// </summary>
     private int whoAmI = -1;
+
+    /// <summary>
+    /// This is true if the leg in front of us has just moved
+    /// preventing us from moving
+    /// </summary>
+    /// <returns></returns>
+    bool constrainedByOtherLeg()
+    {
+        ///we're fine, their leg isn't doing much of anything
+        if (!offsetLeg.isTipTransitioning)
+            return false;
+
+        ///oh bum, their leg is transitioning AND their within the danger zone
+        if (offsetLeg.transitionFrac < legHub.legShiftOffsetFrac)
+            return true;
+
+        ///leg is transitioning, but we're clear to transition ourselves because they're out the 
+        ///time danger zone
+        return false;
+    }
 
 	// Use this for initialization
 	void Start () {
@@ -221,9 +246,6 @@ public class ProceduralLeg : MonoBehaviour {
 
         angle = angle * Mathf.Rad2Deg;
 
-        //Debug.Log("asdfsadf " + angle);
-
-        ///this whole function isn't quite correct somewhere :[
         if(Mathf.Abs(angle) > walkSweepAngleDegrees*2)
         {
             return true;
@@ -231,22 +253,18 @@ public class ProceduralLeg : MonoBehaviour {
 
         float restDistance = lowerBaseOffset.magnitude;
 
-        float extraFrac = 1.1f;
+        //float extraFrac = 1.1f;
 
-        if(whoAmI == 3)
+        /*if(whoAmI == 3)
         {
             sphere.transform.position = plantPositionTip;
             sphere1.transform.position = currentIdealFootRestPosition;
-        }
-
-        //float curDistance = (plantPositionTip - rootTip).magnitude;
+        }*/
 
         float curDistance = (plantPositionTip - currentIdealFootRestPosition).magnitude;
 
         ///take distance from foot ideal rest position
-        //////still dont work :[ do debugsphere
-        ///Ok, this works, but the problem is the rest positions/angles when rotated
-        if(curDistance >= restDistance * 0.4f)// || curDistance < restDistance * (0.9f))
+        if(curDistance >= restDistance * 0.4f)
         {
             return true;
         }
@@ -263,10 +281,7 @@ public class ProceduralLeg : MonoBehaviour {
         return disp + baseBody.position;
     }
 
-    /// <summary>
-    /// Ok, this is broken too
-    /// </summary>
-    void updateFootPlantIfNecessary()
+    Vector3 getRestFootPlant()
     {
         Vector3 lowerPos = getCurrentRestPosition();
 
@@ -278,19 +293,95 @@ public class ProceduralLeg : MonoBehaviour {
 
         Vector3 footTip = lowerPos - lowerDir * llength / 2;
 
-        currentIdealFootRestPosition = footTip;
+        return footTip;
+    }
+
+    void requestFootTransition()
+    {
+        if (!isPlanted)
+            return;
 
         if (!ShouldMovePlanted())
             return;
 
-        plantPositionTip = footTip;
+        if (isTipTransitioning)
+            return;
+
+        if (constrainedByOtherLeg())
+            return;
+
+        Vector3 newFoot = getRestFootPlant();
+
+        oldPlantPositionTip = plantPositionTip;
+        nextPlantPositionTip = newFoot;
+        transitionFrac = 0;
+        isTipTransitioning = true;
     }
 
-    public void Tick (float ftime) {
+    Vector3 interpolate(Vector3 cur, Vector3 start, Vector3 end, float fstart, float fend, float t)
+    {
+        float it = (t - fstart) / (fend - fstart);
+
+        if (it < 0 || it >= 1)
+            return cur;
+
+        return start * (1f - it) + end * it;
+    }
+
+    void tickFootTransition(float ftime)
+    {
+        if (!isTipTransitioning)
+            return;
+
+        Vector3 start = oldPlantPositionTip;
+        Vector3 finish = nextPlantPositionTip;
+
+        Vector3 intermediate = ((start + finish) / 2) + new Vector3(0, walkHeight, 0);
+
+        float footTransitionTime = legHub.legShiftTimeSeconds;
+
+        Vector3 ip = new Vector3(0,0,0);
+
+        ip = interpolate(ip, start, intermediate, 0, 0.5f, transitionFrac);
+        ip = interpolate(ip, intermediate, finish, 0.5f, 1f, transitionFrac);
+
+        //Debug.Log(transitionFrac);
+
+        plantPositionTip = ip;
+
+        transitionFrac += ftime / footTransitionTime;
+
+        if (transitionFrac >= 1f)
+            isTipTransitioning = false;
+    }
+
+    /// <summary>
+    /// Ok, this is broken too
+    /// </summary>
+    void updateFootPlantIfNecessary()
+    {
+        Vector3 newFoot = getRestFootPlant();
+
+        currentIdealFootRestPosition = newFoot;
+
+        if (!ShouldMovePlanted())
+            return;
+
+        plantPositionTip = newFoot;
+    }
+
+    public void Tick (float ftime, float direction, float mult) {
+        currentIdealFootRestPosition = getRestFootPlant();
+
         if (isPlanted)
         {
             IKPlantFoot();
-            updateFootPlantIfNecessary();
+            //updateFootPlantIfNecessary();
+
+            if (ShouldMovePlanted())
+                requestFootTransition();
+
+            tickFootTransition(ftime);
             return;
         }
 
@@ -317,7 +408,7 @@ public class ProceduralLeg : MonoBehaviour {
         transform.position = nQuat * offset + baseBody.position;
 
         if(!isPlanted)
-            walkCycleFrac += ftime / walkCycleSeconds;
+            walkCycleFrac += mult * direction * ftime / walkCycleSeconds;
 
         walkCycleFrac %= 1f;
 	}

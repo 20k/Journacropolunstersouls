@@ -10,6 +10,7 @@ public class WigglesMaster : MonoBehaviour {
     public float spiderSpeed = 1.0f;
     public float turnTimeSeconds = 0.5f;
     public float legShiftTimeSeconds = 0.2f;
+    public float legShiftOffsetFrac = 0.333333333f;
 
     bool isTurning = false;
     float turnTimeFrac = 0f;
@@ -96,7 +97,7 @@ public class WigglesMaster : MonoBehaviour {
 
 	    for(int i=0; i<legs.Count; i++)
         {
-            legs[i].Tick(Time.deltaTime * moveDir * getMult());
+            legs[i].Tick(Time.deltaTime, moveDir, getMult());
         }
 	}
 
