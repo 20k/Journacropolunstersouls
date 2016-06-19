@@ -205,20 +205,28 @@ public class ProceduralLeg : MonoBehaviour {
 
         Vector3 relFoot = (plantPositionTip - rootTip).normalized;
 
-        //Vector2 lRoot = new Vector2(rootTip.x, rootTip.z);
-        //Vector2 lFloor = new Vector2(plantPositionTip.x, plantPositionTip.z);
-
         Vector2 lFoot = new Vector2(relFoot.x, relFoot.z);
         Vector2 lBase = new Vector2(baseRight.x, baseRight.z);
 
-        float angle = Mathf.Acos(clamp(Vector2.Dot(lFoot, lBase), -1f, 1f));
+        float angle = Mathf.Acos(clamp(Vector2.Dot(lFoot.normalized, lBase.normalized), -1f, 1f));
 
         angle = angle * Mathf.Rad2Deg;
 
-        Debug.Log("asdfsadf " + angle);
+        //Debug.Log("asdfsadf " + angle);
 
         ///this whole function isn't quite correct somewhere :[
-        if(Mathf.Abs(angle) > walkSweepAngleDegrees*4)
+        if(Mathf.Abs(angle) > walkSweepAngleDegrees*2)
+        {
+            return true;
+        }
+
+        float restDistance = lowerBaseOffset.magnitude;
+
+        float extraFrac = 1.1f;
+
+        float curDistance = (plantPositionTip - rootTip).magnitude;
+
+        if(curDistance >= restDistance * extraFrac)
         {
             return true;
         }
@@ -236,15 +244,12 @@ public class ProceduralLeg : MonoBehaviour {
     }
 
     /// <summary>
-    /// need to reset other bits too :[
+    /// Ok, this is broken too
     /// </summary>
     void updateFootPlantIfNecessary()
     {
         if (!ShouldMovePlanted())
             return;
-
-        ///fix from here onwards :[
-        return;
 
         Vector3 lowerPos = getCurrentRestPosition();
 
@@ -262,8 +267,8 @@ public class ProceduralLeg : MonoBehaviour {
     public void Tick (float ftime) {
         if (isPlanted)
         {
-            updateFootPlantIfNecessary();
             IKPlantFoot();
+            updateFootPlantIfNecessary();
             return;
         }
 
