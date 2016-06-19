@@ -25,6 +25,9 @@ public class ProceduralLeg : MonoBehaviour {
     Quaternion lowerLegBaseRotation;
 
     Vector3 lowerBaseOffset;
+    Vector3 currentIdealFootRestPosition;
+
+    float legShiftTimeSeconds;
 
     /// <summary>
     /// for debugging
@@ -41,6 +44,9 @@ public class ProceduralLeg : MonoBehaviour {
 
         lowerBaseOffset = lowerLeg.position - baseBody.position;
         lowerLegBaseRotation = lowerLeg.rotation;
+        currentIdealFootRestPosition = lowerLeg.position;
+
+        legShiftTimeSeconds = legHub.legShiftTimeSeconds;
 
         sphere = GameObject.Find("DebugSphere");
         sphere1 = GameObject.Find("DebugSphere1");
@@ -227,9 +233,20 @@ public class ProceduralLeg : MonoBehaviour {
 
         float extraFrac = 1.1f;
 
-        float curDistance = (plantPositionTip - rootTip).magnitude;
+        if(whoAmI == 3)
+        {
+            sphere.transform.position = plantPositionTip;
+            sphere1.transform.position = currentIdealFootRestPosition;
+        }
 
-        if(curDistance >= restDistance * extraFrac)
+        //float curDistance = (plantPositionTip - rootTip).magnitude;
+
+        float curDistance = (plantPositionTip - currentIdealFootRestPosition).magnitude;
+
+        ///take distance from foot ideal rest position
+        //////still dont work :[ do debugsphere
+        ///Ok, this works, but the problem is the rest positions/angles when rotated
+        if(curDistance >= restDistance * 0.4f)// || curDistance < restDistance * (0.9f))
         {
             return true;
         }
@@ -251,24 +268,20 @@ public class ProceduralLeg : MonoBehaviour {
     /// </summary>
     void updateFootPlantIfNecessary()
     {
-        if (!ShouldMovePlanted())
-            return;
-
         Vector3 lowerPos = getCurrentRestPosition();
 
         Vector3 lowerReference = new Vector3(0, 1, 0);
 
-        Vector3 lowerDir = lowerLegBaseRotation * baseBody.rotation * lowerReference;
+        Vector3 lowerDir = baseBody.rotation * lowerLegBaseRotation * lowerReference;
 
         float llength = lowerLeg.localScale.y;
 
         Vector3 footTip = lowerPos - lowerDir * llength / 2;
 
-        /*if (whoAmI == 3)
-        {
-            sphere.transform.position = footTip;
-            sphere1.transform.position = plantPositionTip;
-        }*/
+        currentIdealFootRestPosition = footTip;
+
+        if (!ShouldMovePlanted())
+            return;
 
         plantPositionTip = footTip;
     }

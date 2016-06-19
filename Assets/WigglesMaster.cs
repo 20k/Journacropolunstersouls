@@ -9,6 +9,7 @@ public class WigglesMaster : MonoBehaviour {
     public Transform wiggles;
     public float spiderSpeed = 1.0f;
     public float turnTimeSeconds = 0.5f;
+    public float legShiftTimeSeconds = 0.2f;
 
     bool isTurning = false;
     float turnTimeFrac = 0f;
@@ -80,8 +81,8 @@ public class WigglesMaster : MonoBehaviour {
 
         wiggles.position += translate;
 
-        if (Mathf.Abs(input.y) < Mathf.Epsilon)
-            return;
+        //if (Mathf.Abs(input.y) < Mathf.Epsilon)
+        //    return;
 
         int moveDir = 0;
 
@@ -89,6 +90,9 @@ public class WigglesMaster : MonoBehaviour {
             moveDir = 1;
         else
             moveDir = -1;
+
+        if (input.magnitude < Mathf.Epsilon)
+            moveDir = 0;
 
 	    for(int i=0; i<legs.Count; i++)
         {
