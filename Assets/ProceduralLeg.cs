@@ -22,6 +22,8 @@ public class ProceduralLeg : MonoBehaviour {
     private GameObject sphere;
     private GameObject sphere1;
 
+    Quaternion lowerLegBaseRotation;
+
     Vector3 lowerBaseOffset;
 
     /// <summary>
@@ -38,6 +40,7 @@ public class ProceduralLeg : MonoBehaviour {
         lowerLeg = this.gameObject.transform.GetChild(1);
 
         lowerBaseOffset = lowerLeg.position - baseBody.position;
+        lowerLegBaseRotation = lowerLeg.rotation;
 
         sphere = GameObject.Find("DebugSphere");
         sphere1 = GameObject.Find("DebugSphere1");
@@ -255,11 +258,17 @@ public class ProceduralLeg : MonoBehaviour {
 
         Vector3 lowerReference = new Vector3(0, 1, 0);
 
-        Vector3 lowerDir = lowerLeg.rotation * lowerReference;
+        Vector3 lowerDir = lowerLegBaseRotation * baseBody.rotation * lowerReference;
 
         float llength = lowerLeg.localScale.y;
 
         Vector3 footTip = lowerPos - lowerDir * llength / 2;
+
+        /*if (whoAmI == 3)
+        {
+            sphere.transform.position = footTip;
+            sphere1.transform.position = plantPositionTip;
+        }*/
 
         plantPositionTip = footTip;
     }
