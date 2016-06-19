@@ -71,6 +71,16 @@ public class WigglesMaster : MonoBehaviour {
             }
         }
 
+        if(Input.GetKeyDown(KeyCode.Z))
+        {
+            FirmlyPlantAllFeet();
+        }
+
+        if(Input.GetKeyDown(KeyCode.X))
+        {
+            FirmlyUnplantAllFeet();
+        }
+
         if(Input.GetKeyDown(KeyCode.R))
         {
             ExecuteTurn(90);
@@ -100,6 +110,22 @@ public class WigglesMaster : MonoBehaviour {
             legs[i].Tick(Time.deltaTime, moveDir, getMult());
         }
 	}
+
+    void FirmlyPlantAllFeet()
+    {
+        for(int i=0; i<legs.Count; i++)
+        {
+            legs[i].FirmlyPlant();
+        }
+    }
+
+    void FirmlyUnplantAllFeet()
+    {
+        for (int i = 0; i < legs.Count; i++)
+        {
+            legs[i].FirmlyUnplant();
+        }
+    }
 
     void PlantAllFeet()
     {

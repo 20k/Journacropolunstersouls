@@ -20,6 +20,7 @@ public class ProceduralLeg : MonoBehaviour {
     private bool isTipTransitioning = false;
     private float transitionFrac = 0;
     private bool isPlanted = false; //should we use dynamic, or leave the foot alone and only move when waked?
+    private bool isFirmlyPlanted = false; //cannot be moved by request, can only be toggled
 
     private Transform upperLeg;
     private Transform lowerLeg;
@@ -92,10 +93,8 @@ public class ProceduralLeg : MonoBehaviour {
         }
     }
 
-    public void PlantFoot(int who)
+    Vector3 getCurrentFootTip()
     {
-        isPlanted = true;
-
         Vector3 lowerPos = lowerLeg.position;
 
         Vector3 lowerReference = new Vector3(0, 1, 0);
@@ -104,7 +103,16 @@ public class ProceduralLeg : MonoBehaviour {
 
         float llength = lowerLeg.localScale.y;
 
-        Vector3 footTip = lowerPos - lowerDir * llength/2;
+        Vector3 footTip = lowerPos - lowerDir * llength / 2;
+
+        return footTip;
+    }
+
+    public void PlantFoot(int who)
+    {
+        isPlanted = true;
+
+        Vector3 footTip = getCurrentFootTip();
 
         plantPositionTip = footTip;
 
@@ -370,6 +378,28 @@ public class ProceduralLeg : MonoBehaviour {
         plantPositionTip = newFoot;
     }
 
+    public void FirmlyPlant()
+    {
+        if (isFirmlyPlanted)
+            return;
+
+        isFirmlyPlanted = true;
+        isPlanted = true;
+
+        plantPositionTip = getCurrentFootTip();
+
+        //plantPositionTip = getRestFootPlant();
+    }
+
+    public void FirmlyUnplant()
+    {
+        if (!isFirmlyPlanted)
+            return;
+
+        isFirmlyPlanted = false;
+        isPlanted = false;
+    }
+
     public void Tick (float ftime, float direction, float mult) {
         currentIdealFootRestPosition = getRestFootPlant();
 
@@ -378,7 +408,7 @@ public class ProceduralLeg : MonoBehaviour {
             IKPlantFoot();
             //updateFootPlantIfNecessary();
 
-            if (ShouldMovePlanted())
+            if (!isFirmlyPlanted && ShouldMovePlanted())
                 requestFootTransition();
 
             tickFootTransition(ftime);
