@@ -170,12 +170,7 @@ public class ProceduralLeg : MonoBehaviour {
 
         Vector3 lowerDir = lowerLeg.rotation * lowerReference;
 
-        //Vector3 skew1 = nearestSkew(upperPos, upperDir, lowerPos, lowerDir);
-        //Vector3 skew2 = nearestSkew(lowerPos, lowerDir, upperPos, upperDir);
-
-        //Vector3 avgTop = (skew1 + skew2) / 2f;
-
-        //upper is scale.x, lower is scale.y
+        //upper length is scale.x, lower is scale.y
 
         float ulength = upperLeg.localScale.x;
         float llength = lowerLeg.localScale.y;
@@ -363,9 +358,6 @@ public class ProceduralLeg : MonoBehaviour {
             isTipTransitioning = false;
     }
 
-    /// <summary>
-    /// Ok, this is broken too
-    /// </summary>
     void updateFootPlantIfNecessary()
     {
         Vector3 newFoot = getRestFootPlant();

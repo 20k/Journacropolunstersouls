@@ -2,8 +2,89 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityStandardAssets.CrossPlatformInput;
+using System;
+
+public enum waitSlotType
+{
+    attackFinished,
+    turnFinished,
+    COUNT
+}
+
+public class WaitSlots
+{
+    public bool[] slots = new bool[(int)waitSlotType.COUNT];
+    public bool[] everRequestedSlots = new bool[(int)waitSlotType.COUNT];
 
 
+    public WaitSlots()
+    {
+        Reset();
+    }
+
+    public void ActivateWaitSlot(waitSlotType wait)
+    {
+        slots[(int)wait] = true;
+        everRequestedSlots[(int)wait] = true;
+    }
+
+    public void TerminateWaitSlot(waitSlotType wait)
+    {
+        slots[(int)wait] = false;
+    }
+
+    public bool IsWaiting()
+    {
+        for(int i=0; i<(int)waitSlotType.COUNT; i++)
+        {
+            if (slots[i])
+                return true;
+        }
+
+        return false;
+    }
+
+    public bool CanGoAhead(waitSlotType wait)
+    {
+        if(IsWaiting())
+            return false;
+
+        if(EverRequested(wait))
+            return false;
+
+        return true;
+    }
+
+    public bool EverRequested(waitSlotType wait)
+    {
+        return everRequestedSlots[(int)wait];
+    }
+
+    public bool FullyTerminated()
+    {
+        for(int i=0; i<(int)waitSlotType.COUNT; i++)
+        {
+            ///if a slot been accessed
+            if(everRequestedSlots[i])
+            {
+                ///if we're waiting on the slot, we're not fully terminated
+                if (slots[i])
+                    return false;
+            }
+        }
+
+        return true;
+    }
+
+    public void Reset()
+    {
+        for (int i = 0; i < (int)waitSlotType.COUNT; i++)
+        {
+            slots[i] = false;
+            everRequestedSlots[i] = false;
+        }
+    }
+}
 
 public class WigglesMaster : MonoBehaviour {
 
@@ -13,13 +94,41 @@ public class WigglesMaster : MonoBehaviour {
     public float legShiftTimeSeconds = 0.2f;
     public float legShiftOffsetFrac = 0.333333333f;
     public Transform target;
+    public Transform body;
 
     /// <summary>
-    /// 0.5 is center, 1 is dist/2, 0 is -dist/2
+    /// name, animation curve, time, distance
     /// </summary>
-    public AnimationCurve bodySlamZ;
-    public float bodySlamSeconds = 2;
-    public float bodySlamDistance = 5;
+    [Serializable]
+    public class MonsterMove
+    {
+        public String name;
+        public AnimationCurve curve;
+        public float timeSeconds = 2;
+
+        /// <summary>
+        /// 0.5 is center, 1 is dist/2, 0 is -dist/2
+        /// </summary>
+        public float distance = 5;
+    }
+
+    public MonsterMove[] moves;
+
+    MonsterMove GetMove(String name)
+    {
+        for(int i=0; i<moves.Length; i++)
+        {
+            if (name == moves[i].name)
+                return moves[i];
+        }
+
+        Debug.Log("No move with name " + name);
+
+        return moves[0];
+    }
+
+    private String currentMove = "BodySlam";
+    bool moveIsExecuting = false;
 
     float attackFrac = 0;
     bool isAttack = false;
@@ -31,7 +140,83 @@ public class WigglesMaster : MonoBehaviour {
     float startGlobalTurnAngle = 0f;
 
     List<ProceduralLeg> legs = new List<ProceduralLeg>();
-    
+
+    public delegate void moveset();
+
+    WaitSlots currentWaitSlots = new WaitSlots();
+
+    moveset currentMoveFunc;
+
+    /// <summary>
+    /// ? 
+    /// </summary>
+    void None()
+    {
+       
+    }
+
+    void FaceAndBodyslam()
+    {
+        if (currentWaitSlots.CanGoAhead(waitSlotType.turnFinished))
+        {
+            currentWaitSlots.ActivateWaitSlot(waitSlotType.turnFinished);
+            ExecuteTurn(AngleToTarget(target));
+
+            ///only want to plant feet once, and not firmly
+            PlantAllFeet();
+        }
+
+        if (currentWaitSlots.CanGoAhead(waitSlotType.attackFinished))
+        {
+            currentWaitSlots.ActivateWaitSlot(waitSlotType.attackFinished);
+            InitiateAttack("BodySlam");
+        }
+    }
+
+    void Scuttle()
+    {
+        if (currentWaitSlots.CanGoAhead(waitSlotType.turnFinished))
+        {
+            currentWaitSlots.ActivateWaitSlot(waitSlotType.turnFinished);
+            ExecuteTurn(AngleToTarget(target));
+
+            ///only want to plant feet once, and not firmly
+            PlantAllFeet();
+        }
+
+        if (currentWaitSlots.CanGoAhead(waitSlotType.attackFinished))
+        {
+            currentWaitSlots.ActivateWaitSlot(waitSlotType.attackFinished);
+            InitiateAttack("Scuttle");
+        }
+    }
+
+    //we need a history of attacks to complete the AI puzzle
+    void TickAI()
+    {
+        ///need to use delegate
+        //FaceAndBodyslam();
+
+        currentMoveFunc();
+
+        if (currentWaitSlots.FullyTerminated())
+        {
+            //Debug.Log("Finished moveset");
+            currentWaitSlots.Reset();
+
+            if (DistanceToTarget(target) > GetMove("BodySlam").distance + GetSpiderLength()/2)
+                currentMoveFunc = Scuttle;
+            else
+                currentMoveFunc = FaceAndBodyslam;
+        }
+    }
+
+    // Use this for initialization
+    void Start()
+    {
+        currentMoveFunc = None;
+    }
+
     float AngleToTarget(Transform t)
     {
         Vector3 mypos = wiggles.position;
@@ -46,28 +231,22 @@ public class WigglesMaster : MonoBehaviour {
         Vector2 toThem2d = new Vector2(toThem.x, toThem.z);
         Vector2 spiderFace2d = new Vector2(spiderFace.x, spiderFace.z);
 
-        /*float angle = Mathf.Atan2(-toThem.z, toThem.x) - Mathf.PI/2f;
-
-        if(angle < 0)
-        {
-            angle %= Mathf.PI * 2;
-            angle = Mathf.PI + (Mathf.PI - Mathf.Abs(angle));
-        }
-
-        angle = angle * Mathf.Rad2Deg;*/
-
         float a1 = Mathf.Atan2(toThem2d.y, toThem2d.x);
         float a2 = Mathf.Atan2(spiderFace2d.y, spiderFace2d.x);
 
         float angle = JMaths.AngleDiff(a2, a1);
 
-        //float angle = Mathf.Acos(Mathf.Clamp(Vector2.Dot(toThem2d.normalized, spiderFace2d.normalized), -1f, 1f));
-
         angle = angle * Mathf.Rad2Deg;
 
-        Debug.Log("angle " + angle);
-
         return angle;
+    }
+
+    float DistanceToTarget(Transform t)
+    {
+        Vector2 tpos = new Vector2(t.position.x, t.position.z);
+        Vector2 spos = new Vector2(wiggles.position.x, wiggles.position.z);
+
+        return (tpos - spos).magnitude;
     }
 
     void TickAttack(float ftime)
@@ -75,34 +254,35 @@ public class WigglesMaster : MonoBehaviour {
         if (!isAttack)
             return;
 
-        float eval = - ((bodySlamZ.Evaluate(attackFrac) - 0.5f) * 2);
+        MonsterMove mov = GetMove(currentMove);
 
-        Vector3 npos = new Vector3(0, 0, bodySlamDistance) * eval;
+        float eval = - ((mov.curve.Evaluate(attackFrac) - 0.5f) * 2);
+
+        Vector3 npos = new Vector3(0, 0, mov.distance) * eval;
 
         Vector3 globalDiff = wiggles.rotation * npos;
 
         wiggles.position = startPosition + globalDiff;
 
-        attackFrac += ftime / bodySlamSeconds;
+        attackFrac += ftime / mov.timeSeconds;
 
         if(attackFrac >= 1f)
+        {
             isAttack = false;
+            currentWaitSlots.TerminateWaitSlot(waitSlotType.attackFinished);
+        }
     }
 
-    void InitiateAttack()
+    void InitiateAttack(String name)
     {
         if (isAttack)
             return;
 
+        currentMove = name;
         attackFrac = 0;
         isAttack = true;
         startPosition = wiggles.position;
     }
-
-	// Use this for initialization
-	void Start () {
-	
-	}
 
     float getMult()
     {
@@ -163,7 +343,7 @@ public class WigglesMaster : MonoBehaviour {
 
         if(Input.GetKeyDown(KeyCode.C))
         {
-            InitiateAttack();
+            InitiateAttack("BodySlam");
         }
 
         if(Input.GetKeyDown(KeyCode.R))
@@ -171,7 +351,14 @@ public class WigglesMaster : MonoBehaviour {
             ExecuteTurn(90);
         }
 
-        ExecuteTurn(AngleToTarget(target));
+        if(Input.GetKeyDown(KeyCode.V))
+        {
+            FaceAndBodyslam();
+        }
+
+        TickAI();
+
+        //ExecuteTurn(AngleToTarget(target));
 
         Vector2 input = getDebugInput() * spiderSpeed;
 
@@ -229,7 +416,7 @@ public class WigglesMaster : MonoBehaviour {
         if (!isTurning)
             return;
 
-        float globalY = wiggles.rotation.eulerAngles.y;
+        //float globalY = wiggles.rotation.eulerAngles.y;
 
         ///ie in a circle, the sensible kind of diff we want for angles that takes into account mod 2PI
         //float angleDiff = JMaths.AngleDiff(desiredGlobalTurnAngle, startGlobalTurnAngle);
@@ -243,16 +430,27 @@ public class WigglesMaster : MonoBehaviour {
         Quaternion nquat;
         nquat = Quaternion.Euler(rot.x, rot.y, rot.z);
 
-        wiggles.localRotation = nquat;
+        wiggles.rotation = nquat;
 
         turnTimeFrac += ftime / turnTimeSeconds;
 
         if (turnTimeFrac >= 1f)
+        {
+            currentWaitSlots.TerminateWaitSlot(waitSlotType.turnFinished);
             isTurning = false;
+        }
     }
 
     /// <summary>
     /// dis gun be gud
+    /// so the problem is, we execute a turn
+    /// but the enemy has moved
+    /// so then we have to execute another one
+    /// and thats slow
+    /// we could make turns move at constant angular speed, instead of constant time?
+    /// Actually, you know what, I think this is fine
+    /// We're never constantly tracking the player only executing moves towards him
+    /// we do need it to be able to deal with the player position changing while its moving
     /// </summary>
     void ExecuteTurn(float desiredAngle)
     {
@@ -268,5 +466,10 @@ public class WigglesMaster : MonoBehaviour {
     public void Register(ProceduralLeg leg)
     {
         legs.Add(leg);
+    }
+
+    float GetSpiderLength()
+    {
+        return body.transform.localScale.z;
     }
 }
