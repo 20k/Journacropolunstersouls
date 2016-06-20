@@ -387,8 +387,6 @@ public class ProceduralLeg : MonoBehaviour {
         isPlanted = true;
 
         plantPositionTip = getCurrentFootTip();
-
-        //plantPositionTip = getRestFootPlant();
     }
 
     public void FirmlyUnplant()
