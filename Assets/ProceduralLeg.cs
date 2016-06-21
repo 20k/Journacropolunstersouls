@@ -35,6 +35,9 @@ public class ProceduralLeg : MonoBehaviour {
 
     float legShiftTimeSeconds;
 
+    [HideInInspector]
+    public float maxRestDistance;
+
     /// <summary>
     /// for debugging
     /// </summary>
@@ -76,6 +79,8 @@ public class ProceduralLeg : MonoBehaviour {
 
         sphere = GameObject.Find("DebugSphere");
         sphere1 = GameObject.Find("DebugSphere1");
+
+        maxRestDistance = lowerBaseOffset.magnitude * 0.4f;
     }
 
     void Update()
@@ -254,8 +259,6 @@ public class ProceduralLeg : MonoBehaviour {
             return true;
         }
 
-        float restDistance = lowerBaseOffset.magnitude;
-
         //float extraFrac = 1.1f;
 
         /*if(whoAmI == 3)
@@ -267,7 +270,7 @@ public class ProceduralLeg : MonoBehaviour {
         float curDistance = (plantPositionTip - currentIdealFootRestPosition).magnitude;
 
         ///take distance from foot ideal rest position
-        if(curDistance >= restDistance * 0.4f)
+        if(curDistance >= maxRestDistance)
         {
             return true;
         }
