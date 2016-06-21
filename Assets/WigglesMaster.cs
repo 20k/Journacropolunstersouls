@@ -8,6 +8,7 @@ public enum waitSlotType
 {
     attackFinished,
     turnFinished,
+    extraTurn,
     COUNT
 }
 
@@ -42,6 +43,11 @@ public class WaitSlots
         }
 
         return false;
+    }
+
+    public bool IsWaitingOn(waitSlotType wait)
+    {
+        return slots[(int)wait];
     }
 
     public bool CanGoAhead(waitSlotType wait)
@@ -187,7 +193,27 @@ public class WigglesMaster : MonoBehaviour {
         if (currentWaitSlots.CanGoAhead(waitSlotType.attackFinished))
         {
             currentWaitSlots.ActivateWaitSlot(waitSlotType.attackFinished);
+
+            float distanceToTarget = DistanceToTarget(target);
+
+            GetMove("Scuttle").distance = distanceToTarget - GetSpiderLength()/2f;
+
+            ExecuteTurn(AngleToTarget(target));
+
             InitiateAttack("Scuttle");
+        }
+
+        ///If hardmode. This makes it like, way more competent
+        if(currentWaitSlots.IsWaitingOn(waitSlotType.attackFinished) && attackFrac >= 0.5f
+            && !currentWaitSlots.EverRequested(waitSlotType.extraTurn))
+        {
+            ExecuteTurn(AngleToTarget(target));
+
+            ///we don't want to wait, but we want to trigger this
+            currentWaitSlots.ActivateWaitSlot(waitSlotType.extraTurn);
+            currentWaitSlots.TerminateWaitSlot(waitSlotType.extraTurn);
+
+            Debug.Log("Extra turn");
         }
     }
 
