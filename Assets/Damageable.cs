@@ -4,6 +4,7 @@ using System.Collections;
 public class Damageable : MonoBehaviour {
 
     public float HP = 100;
+    public string whatTagCanHitMe = "Damaging";
 
 	// Use this for initialization
 	void Start () {
@@ -21,7 +22,7 @@ public class Damageable : MonoBehaviour {
     /// remember to do other->inactivate
     void OnTriggerEnter(Collider other)
     {
-        if (other.tag != "Damaging")
+        if (other.tag != whatTagCanHitMe)
             return;
 
         GameObject gobj = other.gameObject;

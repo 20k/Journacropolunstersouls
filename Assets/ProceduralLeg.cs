@@ -278,6 +278,28 @@ public class ProceduralLeg : MonoBehaviour {
         return false;
     }
 
+    public Vector3 getRandomFootPosition()
+    {
+        Vector3 rest = getRestFootPlant();
+
+        float len = maxRestDistance;
+
+        float angle = Random.RandomRange(-180, 180);
+        float randomLen = Random.RandomRange(len / 4, len);
+
+        float y = Mathf.Sin(angle * Mathf.Deg2Rad) * randomLen;
+        float x = Mathf.Cos(angle * Mathf.Deg2Rad) * randomLen;
+
+        Vector3 nvec = new Vector3(x, 0, y)+ rest;
+
+        return nvec;
+    }
+
+
+    /// <summary>
+    /// not foot
+    /// </summary>
+    /// <returns></returns>
     Vector3 getCurrentRestPosition()
     {
         Quaternion baseQuat = baseBody.rotation;
@@ -332,6 +354,23 @@ public class ProceduralLeg : MonoBehaviour {
             return cur;
 
         return start * (1f - it) + end * it;
+    }
+
+    public void setFootPlantTipTransition(Vector3 pos)
+    {
+        if (!isPlanted)
+            return;
+
+        if (isTipTransitioning)
+            return;
+
+        if (constrainedByOtherLeg())
+            return;
+
+        oldPlantPositionTip = plantPositionTip;
+        nextPlantPositionTip = pos;
+        transitionFrac = 0;
+        isTipTransitioning = true;
     }
 
     void tickFootTransition(float ftime)

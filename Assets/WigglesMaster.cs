@@ -247,7 +247,39 @@ public class WigglesMaster : MonoBehaviour {
         }
     }
 
-    //we need a history of attacks to complete the AI puzzle
+    /// <summary>
+    /// How do I terminate this
+    /// </summary>
+    void FootStomp()
+    {
+        if(currentWaitSlots.OnceOnly())
+        {
+            PlantAllFeet();
+        }
+
+        ///I think this doesnt work on like, the first tick or so
+        ///possibly there's a big time.deltaTime?
+        //if (currentWaitSlots.CanGoAhead(waitSlotType.attackFinished))
+        {
+            currentWaitSlots.ActivateWaitSlot(waitSlotType.attackFinished);
+
+            foreach(Transform child in transform)
+            {
+                if(child.tag == "Leg")
+                {
+                    GameObject obj = child.gameObject;
+
+                    ProceduralLeg leg = obj.GetComponent<ProceduralLeg>();
+
+                    Vector3 randomVec = leg.getRandomFootPosition();
+
+                    leg.setFootPlantTipTransition(randomVec);
+                }
+            }
+        }
+    }
+
+        //we need a history of attacks to complete the AI puzzle
     void TickAI()
     {
         ///need to use delegate
@@ -264,6 +296,8 @@ public class WigglesMaster : MonoBehaviour {
                 currentMoveFunc = Scuttle;
             else
                 currentMoveFunc = FaceAndBodyslam;
+
+            //currentMoveFunc = FootStomp;
         }
     }
 
