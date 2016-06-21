@@ -156,7 +156,7 @@ public class SwordAttack : MonoBehaviour {
 
         col.enabled = isDamaging();
     }
-	
+
 	// Update is called once per frame
 	void Update () {
         List<movement> d1 = new List<movement>();
@@ -185,5 +185,10 @@ public class SwordAttack : MonoBehaviour {
         }
 
         activateColliderIfDamaging();
+    }
+
+    public float GetDamage()
+    {
+        return 10f;
     }
 }

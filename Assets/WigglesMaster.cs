@@ -12,11 +12,23 @@ public enum waitSlotType
     COUNT
 }
 
+/// <summary>
+/// have a doonce function that accepts delegates?
+/// </summary>
 public class WaitSlots
 {
     public bool[] slots = new bool[(int)waitSlotType.COUNT];
     public bool[] everRequestedSlots = new bool[(int)waitSlotType.COUNT];
+    bool once = false;
 
+    public bool OnceOnly()
+    {
+        bool val = !once;
+
+        once = true;
+
+        return val;
+    }
 
     public WaitSlots()
     {
@@ -89,6 +101,8 @@ public class WaitSlots
             slots[i] = false;
             everRequestedSlots[i] = false;
         }
+
+        once = false;
     }
 }
 
@@ -101,6 +115,7 @@ public class WigglesMaster : MonoBehaviour {
     public float legShiftOffsetFrac = 0.333333333f;
     public Transform target;
     public Transform body;
+    public bool aiEnabled = false;
 
     /// <summary>
     /// name, animation curve, time, distance
@@ -163,13 +178,28 @@ public class WigglesMaster : MonoBehaviour {
 
     void FaceAndBodyslam()
     {
+        ///plant all feet, and once only
+        if(currentWaitSlots.OnceOnly())
+        {
+            PlantAllFeet();
+        }
+
+        ///all this skip
+        ///If the angle to target less than const, skip the turn
+        float angleToTarget = Mathf.Abs(AngleToTarget(target));
+
+        bool skipTurn = angleToTarget < Mathf.Rad2Deg * Mathf.PI / 8f;
+
+        if(skipTurn && !currentWaitSlots.EverRequested(waitSlotType.turnFinished))
+        {
+            currentWaitSlots.ActivateWaitSlot(waitSlotType.turnFinished);
+            currentWaitSlots.TerminateWaitSlot(waitSlotType.turnFinished);
+        }
+
         if (currentWaitSlots.CanGoAhead(waitSlotType.turnFinished))
         {
             currentWaitSlots.ActivateWaitSlot(waitSlotType.turnFinished);
             ExecuteTurn(AngleToTarget(target));
-
-            ///only want to plant feet once, and not firmly
-            PlantAllFeet();
         }
 
         if (currentWaitSlots.CanGoAhead(waitSlotType.attackFinished))
@@ -382,7 +412,8 @@ public class WigglesMaster : MonoBehaviour {
             FaceAndBodyslam();
         }
 
-        TickAI();
+        if(aiEnabled)
+            TickAI();
 
         //ExecuteTurn(AngleToTarget(target));
 
