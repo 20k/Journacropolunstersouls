@@ -133,6 +133,8 @@ public class SwordAttack : MonoBehaviour {
 
     List<attack> attackList = new List<attack>();
 
+    bool externallyDisabled = false;
+
 	// Use this for initialization
 	void Start () {
 	    slash = new movement(new Vector3(1, 1, 1), new Vector3(-1, 0, 1), 0.3f);
@@ -150,8 +152,20 @@ public class SwordAttack : MonoBehaviour {
         return attackList[0].numPopped == 0;
     }
 
+    public void Inactivate()
+    {
+        Collider col = GetComponent<Collider>();
+
+        col.enabled = false;
+
+        externallyDisabled = true;
+    }
+
     void activateColliderIfDamaging()
     {
+        if (externallyDisabled)
+            return;
+
         Collider col = GetComponent<Collider>();
 
         col.enabled = isDamaging();
@@ -169,6 +183,8 @@ public class SwordAttack : MonoBehaviour {
             attack atk = new attack(d1);
 
             attackList.Add(atk);
+
+            externallyDisabled = false;
         }
 
         for(int i=0; i<attackList.Count; i++)

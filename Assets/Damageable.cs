@@ -36,6 +36,8 @@ public class Damageable : MonoBehaviour {
         HP -= damage * 10f;
 
         Debug.Log("I am hit " + HP);
+
+        sa.Inactivate();
     }
 
     bool alive()

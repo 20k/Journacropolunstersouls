@@ -243,7 +243,7 @@ public class WigglesMaster : MonoBehaviour {
             currentWaitSlots.ActivateWaitSlot(waitSlotType.extraTurn);
             currentWaitSlots.TerminateWaitSlot(waitSlotType.extraTurn);
 
-            Debug.Log("Extra turn");
+            //Debug.Log("Extra turn");
         }
     }
 
