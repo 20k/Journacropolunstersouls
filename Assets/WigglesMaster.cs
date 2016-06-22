@@ -289,7 +289,6 @@ public class WigglesMaster : MonoBehaviour {
 
         if (currentWaitSlots.FullyTerminated())
         {
-            //Debug.Log("Finished moveset");
             currentWaitSlots.Reset();
 
             if (DistanceToTarget(target) > GetMove("BodySlam").distance + GetSpiderLength()/2)

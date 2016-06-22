@@ -133,7 +133,7 @@ public class SwordAttack : MonoBehaviour {
 
     List<attack> attackList = new List<attack>();
 
-    bool externallyDisabled = false;
+    Damager damage;
 
 	// Use this for initialization
 	void Start () {
@@ -141,7 +141,9 @@ public class SwordAttack : MonoBehaviour {
         slashRecoverP1 = new movement(slash.endVec, new Vector3(-0.4f, -0.3f, 1), 0.2f);
         slashRecoverP2 = new movement(slashRecoverP1.endVec, slash.startVec, 0.5f);
 
-        tag = "Damaging";
+        //tag = "Damaging";
+
+        damage = GetComponent<Damager>();
     }
 
     bool isDamaging()
@@ -152,23 +154,14 @@ public class SwordAttack : MonoBehaviour {
         return attackList[0].numPopped == 0;
     }
 
-    public void Inactivate()
-    {
-        Collider col = GetComponent<Collider>();
-
-        col.enabled = false;
-
-        externallyDisabled = true;
-    }
 
     void activateColliderIfDamaging()
     {
-        if (externallyDisabled)
+        if (damage.HasHit())
             return;
 
-        Collider col = GetComponent<Collider>();
-
-        col.enabled = isDamaging();
+        damage.SetDamage(GetDamage());
+        damage.SetActive(isDamaging());
     }
 
 	// Update is called once per frame
@@ -184,7 +177,7 @@ public class SwordAttack : MonoBehaviour {
 
             attackList.Add(atk);
 
-            externallyDisabled = false;
+            damage.ResetHit();
         }
 
         for(int i=0; i<attackList.Count; i++)

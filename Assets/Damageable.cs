@@ -27,7 +27,7 @@ public class Damageable : MonoBehaviour {
 
         GameObject gobj = other.gameObject;
 
-        SwordAttack sa = gobj.GetComponent<SwordAttack>();
+        Damager sa = gobj.GetComponent<Damager>();
 
         if (!sa)
             return;
@@ -38,7 +38,7 @@ public class Damageable : MonoBehaviour {
 
         Debug.Log("I am hit " + HP);
 
-        sa.Inactivate();
+        sa.Hit();
     }
 
     bool alive()
