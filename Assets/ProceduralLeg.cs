@@ -345,8 +345,6 @@ public class ProceduralLeg : MonoBehaviour {
     {
         Vector3 lowerPos = getCurrentRestPosition();
 
-        //Vector3 lowerReference = new Vector3(0, 1, 0);
-
         Vector3 lowerDir = baseBody.rotation * lowerLegBaseRotation * lowerReference;
 
         float llength = lowerLength;
@@ -485,7 +483,9 @@ public class ProceduralLeg : MonoBehaviour {
     /// <param name="direction"></param>
     /// <param name="mult"></param>
     public void Tick (float ftime, float direction, float mult) {
+
         currentIdealFootRestPosition = getRestFootPlant();
+        legShiftTimeSeconds = legHub.legShiftTimeSeconds;
 
         if (isPlanted)
         {

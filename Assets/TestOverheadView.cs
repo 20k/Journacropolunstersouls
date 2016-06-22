@@ -124,7 +124,9 @@ namespace JamesCamera.TestOverheadView
             //Vector2 input = GetInput();
             input = GetInput() * Time.deltaTime / Time.fixedDeltaTime;
 
-            legController.SetMoveDir(input);
+            float runval = movementSettings.Running ? 1f : 0f;
+
+            legController.SetMoveDir(input, runval * movementSettings.RunMultiplier, movementSettings.Running);
 
             if ((Mathf.Abs(input.x) > float.Epsilon || Mathf.Abs(input.y) > float.Epsilon) && (advancedSettings.airControl || m_IsGrounded))
             {
