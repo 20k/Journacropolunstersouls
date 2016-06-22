@@ -15,6 +15,7 @@ namespace JamesCamera.TestOverheadView
             public float RunMultiplier = 2.0f;   // Speed when sprinting
             public KeyCode RunKey = KeyCode.LeftShift;
             public float JumpForce = 30f;
+
             public AnimationCurve SlopeCurveModifier = new AnimationCurve(new Keyframe(-90.0f, 1.0f), new Keyframe(0.0f, 1.0f), new Keyframe(90.0f, 0.0f));
             [HideInInspector]
             public float CurrentTargetSpeed = 1f;
@@ -70,6 +71,15 @@ namespace JamesCamera.TestOverheadView
         public AdvancedSettings advancedSettings = new AdvancedSettings();
 
 
+        public AnimationCurve DodgeCurve;
+        public float DodgeDistance = 1;
+        public float DodgeTimeSeconds = 1;
+        public float DodgeTimeRecovery = 1.5f;
+        private float DodgeTime = 0; ///not a frac
+        private bool IsDodging = false;
+        private Vector3 DodgeStart = new Vector3(0, 0, 0);
+        private Vector3 DodgeEnd = new Vector3(0, 0, 0);
+
         private Rigidbody m_RigidBody;
         private CapsuleCollider m_Capsule;
         private float m_YRotation;
@@ -111,6 +121,41 @@ namespace JamesCamera.TestOverheadView
             m_RigidBody = GetComponent<Rigidbody>();
             m_Capsule = GetComponent<CapsuleCollider>();
             cameraOrbit.Init(transform, cam.transform);
+        }
+
+        void Dodge(Vector2 input)
+        {
+            if (IsDodging)
+                return;
+
+            //Vector3 in3 = new Vector3(input.x, 0, input.y);
+
+            Vector3 desiredMove = cam.transform.forward * input.y + cam.transform.right * input.x;
+            desiredMove = Vector3.ProjectOnPlane(desiredMove, m_GroundContactNormal).normalized;
+
+            IsDodging = true;
+            DodgeTime = 0;
+            DodgeStart = transform.position;
+            DodgeEnd = DodgeStart + desiredMove.normalized * DodgeDistance;
+        }
+
+        void DodgeTick(float ftime)
+        {
+            if (!IsDodging)
+                return;
+
+            //Vector3 interp = DodgeStart * (1.f - DodgeFrac) + DodgeEnd * DodgeFrac;
+
+            //0 = beginning, 1 = end
+            float sampleCurve = 1f - DodgeCurve.Evaluate(DodgeTime/DodgeTimeSeconds);
+
+            if(DodgeTime < DodgeTimeSeconds)
+                transform.position = DodgeStart * sampleCurve + DodgeEnd * (1f - sampleCurve);
+
+            DodgeTime += ftime;
+
+            if (DodgeTime >= DodgeTimeSeconds + DodgeTimeRecovery)
+                IsDodging = false;
         }
 
         private void Update()
@@ -165,6 +210,13 @@ namespace JamesCamera.TestOverheadView
             }
             m_Jump = false;
             UpdateCharacter();
+
+            if(Input.GetKeyDown(KeyCode.LeftControl))
+            {
+                Dodge(input);
+            }
+
+            DodgeTick(Time.deltaTime);
         }
 
         void LateUpdate()
