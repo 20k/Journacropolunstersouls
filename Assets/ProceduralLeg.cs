@@ -14,6 +14,11 @@ public class ProceduralLeg : MonoBehaviour {
     public Vector3 upperReference = new Vector3(1, 0, 0);
     public Vector3 lowerReference = new Vector3(0, 1, 0);
 
+    public float forwardOffset = 0;
+
+    public bool useAngleConstraint = true;
+    public bool idleAt0Offset = false;
+
     public float heightMin = 5f;
     public float moveDistanceMult = 0.4f;
 
@@ -32,12 +37,16 @@ public class ProceduralLeg : MonoBehaviour {
     private bool isFirmlyPlanted = false; //cannot be moved by request, can only be toggled
 
     private bool restTracking = false;
+    private bool isIdle = true;
+
 
     private Transform upperLeg;
     private Transform lowerLeg;
 
     private GameObject sphere;
     private GameObject sphere1;
+
+    private Vector3 bodyReference = new Vector3(0, 0, -1);
 
     Quaternion lowerLegBaseRotation;
 
@@ -98,6 +107,11 @@ public class ProceduralLeg : MonoBehaviour {
 
         //lowerLength = lowerLeg.localScale.y;
         //upperLength = upperLeg.localScale.x;
+    }
+
+    public void SetIdling(bool idle)
+    {
+        isIdle = idle;
     }
 
     void Update()
@@ -272,7 +286,7 @@ public class ProceduralLeg : MonoBehaviour {
 
         angle = angle * Mathf.Rad2Deg;
 
-        if(Mathf.Abs(angle) > walkSweepAngleDegrees*2)
+        if(useAngleConstraint && Mathf.Abs(angle) > walkSweepAngleDegrees*2)
         {
             return true;
         }
@@ -308,7 +322,7 @@ public class ProceduralLeg : MonoBehaviour {
         float y = Mathf.Sin(angle * Mathf.Deg2Rad) * randomLen;
         float x = Mathf.Cos(angle * Mathf.Deg2Rad) * randomLen;
 
-        Vector3 nvec = new Vector3(x, 0, y)+ rest;
+        Vector3 nvec = new Vector3(x, 0, y);
 
         return nvec;
     }
@@ -338,6 +352,15 @@ public class ProceduralLeg : MonoBehaviour {
         float llength = lowerLength;
 
         Vector3 footTip = lowerPos - lowerDir * llength / 2;
+
+        Vector3 frontExtra = baseBody.rotation * bodyReference * forwardOffset;
+
+        if(isIdle && idleAt0Offset)
+        {
+            frontExtra = new Vector3(0, 0, 0);
+        }
+
+        footTip = footTip + frontExtra;
 
         return footTip;
     }

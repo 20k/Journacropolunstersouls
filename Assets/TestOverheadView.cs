@@ -64,6 +64,7 @@ namespace JamesCamera.TestOverheadView
 
 
         public Camera cam;
+        public MainCharacterProceduralLegController legController;
         public MovementSettings movementSettings = new MovementSettings();
         public CameraRotater cameraOrbit = new CameraRotater();
         public AdvancedSettings advancedSettings = new AdvancedSettings();
@@ -122,6 +123,8 @@ namespace JamesCamera.TestOverheadView
             GroundCheck();
             //Vector2 input = GetInput();
             input = GetInput() * Time.deltaTime / Time.fixedDeltaTime;
+
+            legController.SetMoveDir(input);
 
             if ((Mathf.Abs(input.x) > float.Epsilon || Mathf.Abs(input.y) > float.Epsilon) && (advancedSettings.airControl || m_IsGrounded))
             {
