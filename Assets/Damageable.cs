@@ -46,6 +46,9 @@ public class Damageable : MonoBehaviour {
 
         float damage = sa.GetDamage();
 
+        if (damage <= 0)
+            return;
+
         HP -= damage;
 
         Debug.Log("I am hit " + HP);

@@ -6,7 +6,6 @@ namespace JamesCamera.TestOverheadView
 {
     public class MainCharacterAnimation : MonoBehaviour
     {
-
         public Transform leftLeg;
         public Transform rightLeg;
         public Transform reference;

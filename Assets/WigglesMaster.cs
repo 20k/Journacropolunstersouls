@@ -352,13 +352,23 @@ public class WigglesMaster : MonoBehaviour {
 
                 ///this may now be unnecessary due to invuln times
                 ///will also not work for MP
-                if(!dam[i].HasHit())
-                    dam[i].SetActive(true);
+                //if(!dam[i].HasHit())
+                //    dam[i].SetActive(true);
             }
         }
         else
         {
             SetNoDamage();
+        }
+    }
+
+    void ActivateColliders()
+    {
+        Damager[] dam = GetComponentsInChildren<Damager>();
+
+        for (int i = 0; i < dam.Length; i++)
+        {
+            dam[i].SetActive(true);
         }
     }
 
@@ -369,7 +379,6 @@ public class WigglesMaster : MonoBehaviour {
         for (int i = 0; i < dam.Length; i++)
         {
             dam[i].SetDamage(0);
-            dam[i].SetActive(false);
         }
     }
 
@@ -380,7 +389,6 @@ public class WigglesMaster : MonoBehaviour {
         for (int i = 0; i < dam.Length; i++)
         {
             dam[i].SetDamage(0);
-            dam[i].SetActive(false);
             dam[i].ResetHit();
         }
     }
@@ -502,6 +510,8 @@ public class WigglesMaster : MonoBehaviour {
 
         if(aiEnabled)
             TickAI();
+
+        ActivateColliders();
 
         //ExecuteTurn(AngleToTarget(target));
 
