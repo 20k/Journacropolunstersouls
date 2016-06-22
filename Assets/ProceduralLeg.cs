@@ -11,6 +11,9 @@ public class ProceduralLeg : MonoBehaviour {
     public LegHub legHub;
     public ProceduralLeg offsetLeg;
 
+    public Vector3 upperReference = new Vector3(1, 0, 0);
+    public Vector3 lowerReference = new Vector3(0, 1, 0);
+
     private float walkCycleFrac = 0f;
     private Vector3 offset;
     //private Vector3 plantPosition; //we're planted in the ground
@@ -102,7 +105,7 @@ public class ProceduralLeg : MonoBehaviour {
     {
         Vector3 lowerPos = lowerLeg.position;
 
-        Vector3 lowerReference = new Vector3(0, 1, 0);
+        //Vector3 lowerReference = new Vector3(0, 1, 0);
 
         Vector3 lowerDir = lowerLeg.rotation * lowerReference;
 
@@ -111,6 +114,11 @@ public class ProceduralLeg : MonoBehaviour {
         Vector3 footTip = lowerPos - lowerDir * llength / 2;
 
         return footTip;
+    }
+
+    public bool IsPlanted()
+    {
+        return isPlanted;
     }
 
     public void PlantFoot(int who)
@@ -165,13 +173,13 @@ public class ProceduralLeg : MonoBehaviour {
         Vector3 upperPos = upperLeg.position;
         Vector3 lowerPos = lowerLeg.position;
 
-        Vector3 upperReference = new Vector3(1, 0, 0);
+        //Vector3 upperReference = new Vector3(1, 0, 0);
 
         Quaternion uRot = upperLeg.rotation;
 
         Vector3 upperDir = uRot * upperReference;
 
-        Vector3 lowerReference = new Vector3(0, 1, 0);
+        //Vector3 lowerReference = new Vector3(0, 1, 0);
 
         Vector3 lowerDir = lowerLeg.rotation * lowerReference;
 
@@ -237,7 +245,7 @@ public class ProceduralLeg : MonoBehaviour {
 
         Vector3 upperPos = upperLeg.position;
 
-        Vector3 upperReference = new Vector3(1, 0, 0);
+        //Vector3 upperReference = new Vector3(1, 0, 0);
 
         Quaternion uRot = upperLeg.rotation;
 
@@ -313,7 +321,7 @@ public class ProceduralLeg : MonoBehaviour {
     {
         Vector3 lowerPos = getCurrentRestPosition();
 
-        Vector3 lowerReference = new Vector3(0, 1, 0);
+        //Vector3 lowerReference = new Vector3(0, 1, 0);
 
         Vector3 lowerDir = baseBody.rotation * lowerLegBaseRotation * lowerReference;
 
@@ -432,6 +440,12 @@ public class ProceduralLeg : MonoBehaviour {
         isPlanted = false;
     }
 
+    /// <summary>
+    /// last two parameters only useful for ye olde style sinwalk
+    /// </summary>
+    /// <param name="ftime"></param>
+    /// <param name="direction"></param>
+    /// <param name="mult"></param>
     public void Tick (float ftime, float direction, float mult) {
         currentIdealFootRestPosition = getRestFootPlant();
 
