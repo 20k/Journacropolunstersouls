@@ -5,10 +5,14 @@ public class Damageable : MonoBehaviour {
 
     public float HP = 100;
     public string whatTagCanHitMe = "Damaging";
+    public float invulnTimeSeconds = 1;
+
+    bool isInvuln = false;
+    float invulnFrac = 0;
 
 	// Use this for initialization
 	void Start () {
-	
+
 	}
 	
 	// Update is called once per frame
@@ -17,12 +21,20 @@ public class Damageable : MonoBehaviour {
         {
             gameObject.SetActive(false);
         }
-	}
+
+        invulnFrac += Time.deltaTime / invulnTimeSeconds;
+
+        if (invulnFrac > 1f)
+            isInvuln = false;
+    }
 
     /// remember to do other->inactivate
     void OnTriggerEnter(Collider other)
     {
         if (other.tag != whatTagCanHitMe)
+            return;
+
+        if (isInvuln)
             return;
 
         GameObject gobj = other.gameObject;
@@ -34,11 +46,14 @@ public class Damageable : MonoBehaviour {
 
         float damage = sa.GetDamage();
 
-        HP -= damage * 10f;
+        HP -= damage;
 
         Debug.Log("I am hit " + HP);
 
         sa.Hit();
+
+        isInvuln = true;
+        invulnFrac = 0;
     }
 
     bool alive()

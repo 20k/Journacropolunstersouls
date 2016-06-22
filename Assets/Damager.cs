@@ -13,6 +13,7 @@ public class Damager : MonoBehaviour {
 	void Start () {
         tag = tagCanHit;
         col = GetComponent<Collider>();
+        col.enabled = false;
 	}
 	
 	// Update is called once per frame
@@ -45,6 +46,11 @@ public class Damager : MonoBehaviour {
         col.enabled = false;
     }
 
+    /// <summary>
+    /// hmm, wont work in network
+    /// we want to keep a table of objects we've hit, and use that to skip
+    /// in collider
+    /// </summary>
     public void Hit()
     {
         hitObject = true;

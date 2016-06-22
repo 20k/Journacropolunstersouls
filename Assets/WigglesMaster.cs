@@ -125,6 +125,8 @@ public class WigglesMaster : MonoBehaviour {
     {
         public String name;
         public AnimationCurve curve;
+        public AnimationCurve damageCurve;
+        public float maxDamage = 10;
         public float timeSeconds = 2;
 
         /// <summary>
@@ -338,6 +340,49 @@ public class WigglesMaster : MonoBehaviour {
         return (tpos - spos).magnitude;
     }
 
+    void SetDamage(float damage)
+    {
+        if (damage > Mathf.Epsilon)
+        {
+            Damager[] dam = GetComponentsInChildren<Damager>();
+
+            for(int i=0; i<dam.Length; i++)
+            {
+                dam[i].SetDamage(damage);
+
+                if(!dam[i].HasHit())
+                    dam[i].SetActive(true);
+            }
+        }
+        else
+        {
+            SetNoDamage();
+        }
+    }
+
+    void SetNoDamage()
+    {
+        Damager[] dam = GetComponentsInChildren<Damager>();
+
+        for (int i = 0; i < dam.Length; i++)
+        {
+            dam[i].SetDamage(0);
+            dam[i].SetActive(false);
+        }
+    }
+
+    void ResetDamagers()
+    {
+        Damager[] dam = GetComponentsInChildren<Damager>();
+
+        for (int i = 0; i < dam.Length; i++)
+        {
+            dam[i].SetDamage(0);
+            dam[i].SetActive(false);
+            dam[i].ResetHit();
+        }
+    }
+
     void TickAttack(float ftime)
     {
         if (!isAttack)
@@ -346,6 +391,12 @@ public class WigglesMaster : MonoBehaviour {
         MonsterMove mov = GetMove(currentMove);
 
         float eval = - ((mov.curve.Evaluate(attackFrac) - 0.5f) * 2);
+
+        float damage = mov.damageCurve.Evaluate(attackFrac) * mov.maxDamage;
+
+        //Debug.Log("afrac then damage " + attackFrac + " " + damage);
+
+        SetDamage(damage);
 
         Vector3 npos = new Vector3(0, 0, mov.distance) * eval;
 
@@ -359,6 +410,8 @@ public class WigglesMaster : MonoBehaviour {
         {
             isAttack = false;
             currentWaitSlots.TerminateWaitSlot(waitSlotType.attackFinished);
+            ///reset attack damage state
+            ResetDamagers();
         }
     }
 
@@ -560,6 +613,7 @@ public class WigglesMaster : MonoBehaviour {
 
     float GetSpiderLength()
     {
+        ///+ head.scale.x, that's whats incorrect
         return body.transform.localScale.z;
     }
 }
