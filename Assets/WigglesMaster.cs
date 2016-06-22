@@ -111,11 +111,12 @@ public class WigglesMaster : MonoBehaviour {
     public Transform wiggles;
     public float spiderSpeed = 1.0f;
     public float turnTimeSeconds = 0.5f;
-    public float legShiftTimeSeconds = 0.2f;
-    public float legShiftOffsetFrac = 0.333333333f;
+    //public float legShiftTimeSeconds = 0.2f;
+    //public float legShiftOffsetFrac = 0.333333333f;
     public Transform target;
     public Transform body;
     public bool aiEnabled = false;
+    public LegHub legHub;
 
     /// <summary>
     /// name, animation curve, time, distance
@@ -162,7 +163,7 @@ public class WigglesMaster : MonoBehaviour {
     float desiredRelativeTurnAngle = 0f;
     float startGlobalTurnAngle = 0f;
 
-    List<ProceduralLeg> legs = new List<ProceduralLeg>();
+    List<ProceduralLeg> legs;
 
     public delegate void moveset();
 
@@ -175,7 +176,7 @@ public class WigglesMaster : MonoBehaviour {
     /// </summary>
     void None()
     {
-       
+
     }
 
     void FaceAndBodyslam()
@@ -306,6 +307,8 @@ public class WigglesMaster : MonoBehaviour {
     void Start()
     {
         currentMoveFunc = None;
+
+        legs = legHub.GetLegs();
     }
 
     float AngleToTarget(Transform t)

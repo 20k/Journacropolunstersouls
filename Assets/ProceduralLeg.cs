@@ -8,7 +8,7 @@ public class ProceduralLeg : MonoBehaviour {
     public float fracOffset = 0;
     public float walkHeight = 1;
     public float side = 1; //1 is left, -1 is right
-    public WigglesMaster legHub;
+    public LegHub legHub;
     public ProceduralLeg offsetLeg;
 
     private float walkCycleFrac = 0f;
