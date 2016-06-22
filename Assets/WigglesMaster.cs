@@ -350,6 +350,8 @@ public class WigglesMaster : MonoBehaviour {
             {
                 dam[i].SetDamage(damage);
 
+                ///this may now be unnecessary due to invuln times
+                ///will also not work for MP
                 if(!dam[i].HasHit())
                     dam[i].SetActive(true);
             }

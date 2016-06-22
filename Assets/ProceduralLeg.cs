@@ -383,7 +383,7 @@ public class ProceduralLeg : MonoBehaviour {
 
         Vector3 intermediate = ((start + finish) / 2) + new Vector3(0, walkHeight, 0);
 
-        float footTransitionTime = legHub.legShiftTimeSeconds;
+        float footTransitionTime = legShiftTimeSeconds;
 
         Vector3 ip = new Vector3(0,0,0);
 
