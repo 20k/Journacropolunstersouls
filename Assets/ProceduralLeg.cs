@@ -14,6 +14,12 @@ public class ProceduralLeg : MonoBehaviour {
     public Vector3 upperReference = new Vector3(1, 0, 0);
     public Vector3 lowerReference = new Vector3(0, 1, 0);
 
+    public float heightMin = 5f;
+    public float moveDistanceMult = 0.4f;
+
+    private float upperLength;
+    private float lowerLength;
+
     private float walkCycleFrac = 0f;
     private Vector3 offset;
     //private Vector3 plantPosition; //we're planted in the ground
@@ -24,6 +30,8 @@ public class ProceduralLeg : MonoBehaviour {
     private float transitionFrac = 0;
     private bool isPlanted = false; //should we use dynamic, or leave the foot alone and only move when waked?
     private bool isFirmlyPlanted = false; //cannot be moved by request, can only be toggled
+
+    private bool restTracking = false;
 
     private Transform upperLeg;
     private Transform lowerLeg;
@@ -83,7 +91,13 @@ public class ProceduralLeg : MonoBehaviour {
         sphere = GameObject.Find("DebugSphere");
         sphere1 = GameObject.Find("DebugSphere1");
 
-        maxRestDistance = lowerBaseOffset.magnitude * 0.4f;
+        maxRestDistance = lowerBaseOffset.magnitude * moveDistanceMult;
+
+        lowerLength = Mathf.Max(lowerLeg.localScale.x, Mathf.Max(lowerLeg.localScale.y, lowerLeg.localScale.z));
+        upperLength = Mathf.Max(upperLeg.localScale.x, Mathf.Max(upperLeg.localScale.y, upperLeg.localScale.z));
+
+        //lowerLength = lowerLeg.localScale.y;
+        //upperLength = upperLeg.localScale.x;
     }
 
     void Update()
@@ -109,7 +123,7 @@ public class ProceduralLeg : MonoBehaviour {
 
         Vector3 lowerDir = lowerLeg.rotation * lowerReference;
 
-        float llength = lowerLeg.localScale.y;
+        float llength = lowerLength;
 
         Vector3 footTip = lowerPos - lowerDir * llength / 2;
 
@@ -173,29 +187,26 @@ public class ProceduralLeg : MonoBehaviour {
         Vector3 upperPos = upperLeg.position;
         Vector3 lowerPos = lowerLeg.position;
 
-        //Vector3 upperReference = new Vector3(1, 0, 0);
-
         Quaternion uRot = upperLeg.rotation;
 
         Vector3 upperDir = uRot * upperReference;
 
-        //Vector3 lowerReference = new Vector3(0, 1, 0);
-
         Vector3 lowerDir = lowerLeg.rotation * lowerReference;
 
-        //upper length is scale.x, lower is scale.y
+        //upper length is scale.x, lower is scale.y for spider
 
-        float ulength = upperLeg.localScale.x;
-        float llength = lowerLeg.localScale.y;
+        float ulength = upperLength;
+        float llength = lowerLength;
 
         float dir = side;
+
 
         Vector3 requestedFootTip = plantPositionTip;
         Vector3 rootTip = upperPos - dir * upperDir * ulength/2;
 
 
         float joinAngle = getJointAngle(requestedFootTip, rootTip, ulength, llength);
-        
+
         ///rest positions
         float s1 = ulength + llength;
         float s2 = ulength;
@@ -209,7 +220,6 @@ public class ProceduralLeg : MonoBehaviour {
         Vector3 perp = baseBody.rotation * (new Vector3(0, 0, -1) * dir);
 
         Vector3 d1 = rootTip - requestedFootTip;
-        Vector3 d2 = new Vector3(1, 0, 0);
 
         Vector3 d3 = Vector3.Cross(d1, perp);
 
@@ -218,7 +228,7 @@ public class ProceduralLeg : MonoBehaviour {
         Vector3 half = (requestedFootTip + rootTip) / 2f;
 
         ///why negative?
-        Vector3 topPos = half + Mathf.Min(height, -5f) * d3;
+        Vector3 topPos = half + Mathf.Min(height, -heightMin) * d3;
 
         Quaternion lookUpper = Quaternion.FromToRotation(dir * upperReference, topPos - rootTip);
         Quaternion lookLower = Quaternion.FromToRotation(lowerReference, topPos - requestedFootTip);
@@ -241,7 +251,7 @@ public class ProceduralLeg : MonoBehaviour {
 
         float dir = side;
 
-        float ulength = upperLeg.localScale.x;
+        float ulength = upperLength;
 
         Vector3 upperPos = upperLeg.position;
 
@@ -325,7 +335,7 @@ public class ProceduralLeg : MonoBehaviour {
 
         Vector3 lowerDir = baseBody.rotation * lowerLegBaseRotation * lowerReference;
 
-        float llength = lowerLeg.localScale.y;
+        float llength = lowerLength;
 
         Vector3 footTip = lowerPos - lowerDir * llength / 2;
 
@@ -379,6 +389,11 @@ public class ProceduralLeg : MonoBehaviour {
         nextPlantPositionTip = pos;
         transitionFrac = 0;
         isTipTransitioning = true;
+    }
+
+    public void enableRestTracking()
+    {
+        restTracking = true;
     }
 
     void tickFootTransition(float ftime)
@@ -451,6 +466,12 @@ public class ProceduralLeg : MonoBehaviour {
 
         if (isPlanted)
         {
+            if (restTracking)
+            {
+                nextPlantPositionTip = getRestFootPlant();
+            }
+
+
             IKPlantFoot();
             //updateFootPlantIfNecessary();
 
@@ -458,6 +479,7 @@ public class ProceduralLeg : MonoBehaviour {
                 requestFootTransition();
 
             tickFootTransition(ftime);
+
             return;
         }
 

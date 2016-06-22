@@ -19,9 +19,11 @@ public class MainCharacterProceduralLegController : MonoBehaviour {
         {
             if (!legs[i].IsPlanted())
                 legs[i].PlantFoot(i);
+
+            legs[i].enableRestTracking();
         }
 
-	    for(int i=0; i<legs.Count; i++)
+        for (int i=0; i<legs.Count; i++)
         {
             legs[i].Tick(Time.deltaTime, 1, 1);
         }
