@@ -6,23 +6,26 @@ using Object = UnityEngine.Object;
 
 /// <summary>
 /// use animation curves to define transition from start to end
+/// we'll eventually need separate hand pos, and sword direction
 /// </summary>
+[Serializable]
 public class movement
 {
-    [HideInInspector]
     public Vector3 startVec;
     public Vector3 endVec;
+    /// <summary>
+    /// time to execute this part of the attack
+    /// </summary>
+    public float timeSeconds = 1;
 
     private Quaternion startQuat;
     private Quaternion endQuat;
 
-    /// <summary>
-    /// time to execute attack
-    /// </summary>
+
     [HideInInspector]
-    public float timeSeconds = 1;
     public float timeElapsed = 0;
     private bool going = false;
+    private bool isInit = false;
 
     private void init(Vector3 start, Vector3 end, float time)
     {
@@ -32,6 +35,13 @@ public class movement
 
         startQuat.SetLookRotation(startVec);
         endQuat.SetLookRotation(endVec);
+
+        isInit = true;
+    }
+
+    public void startAtFinishOfPrev(movement prev)
+    {
+        startVec = prev.endVec;
     }
 
     public movement(Vector3 start, Vector3 end, float time)
@@ -56,6 +66,14 @@ public class movement
 
     public void tick(float ftime)
     {
+        if(!isInit)
+        {
+            startQuat.SetLookRotation(startVec);
+            endQuat.SetLookRotation(endVec);
+
+            isInit = true;
+        }
+
         timeElapsed += ftime;
     }
 
@@ -79,16 +97,33 @@ public class movement
     }
 }
 
-class attack
+[Serializable]
+public class attack
 {
-    List<movement> moveList = new List<movement>();
+    //List<movement> moveList = new List<movement>();
+    public List<movement> moveList;
+
+    [HideInInspector]
     public int numPopped = 0;
 
-    public attack(List<movement> moves)
+    /*public attack(List<movement> moves)
     {
+        moveList = new List<movement>();
+
         for(int i=0; i<moves.Count; i++)
         {
             movement m = new movement(moves[i]);
+            moveList.Add(m);
+        }
+    }*/
+
+    public attack(attack a)
+    {
+        moveList = new List<movement>();
+
+        for (int i = 0; i < a.moveList.Count; i++)
+        {
+            movement m = new movement(a.moveList[i]);
             moveList.Add(m);
         }
     }
@@ -135,9 +170,9 @@ public class SwordAttack : MonoBehaviour {
 
     public Transform swordTransform;
 
-    movement slash;
-    movement slashRecoverP1;
-    movement slashRecoverP2;
+    public attack slashAttack;
+
+    //public movement[] slashMoves;
 
     List<attack> attackList = new List<attack>();
 
@@ -145,11 +180,14 @@ public class SwordAttack : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-	    slash = new movement(new Vector3(1, 1, 1), new Vector3(-1, 0, 1), 0.3f);
-        slashRecoverP1 = new movement(slash.endVec, new Vector3(-0.4f, -0.3f, 1), 0.2f);
-        slashRecoverP2 = new movement(slashRecoverP1.endVec, slash.startVec, 0.5f);
+	    //slash = new movement(new Vector3(1, 1, 1), new Vector3(-1, 0, 1), 0.3f);
+        //slashRecoverP1 = new movement(slash.endVec, new Vector3(-0.4f, -0.3f, 1), 0.2f);
+        //slashRecoverP2 = new movement(slashRecoverP1.endVec, slash.startVec, 0.5f);
 
-        //tag = "Damaging";
+        for(int i=1; i<slashAttack.moveList.Count; i++)
+        {
+            slashAttack.moveList[i].startAtFinishOfPrev(slashAttack.moveList[i-1]);
+        }
 
         damage = GetComponent<Damager>();
     }
@@ -162,7 +200,6 @@ public class SwordAttack : MonoBehaviour {
         return attackList[0].numPopped == 0;
     }
 
-
     void activateColliderIfDamaging()
     {
         if (damage.HasHit())
@@ -174,14 +211,16 @@ public class SwordAttack : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-        List<movement> d1 = new List<movement>();
-        d1.Add(slash);
-        d1.Add(slashRecoverP1);
-        d1.Add(slashRecoverP2);
+        /*List<movement> d1 = new List<movement>();
+
+        for(int i=0; i<slashMoves.Length; i++)
+        {
+            d1.Add(slashMoves[i]);
+        }*/
 
         if (Input.GetMouseButtonDown(0))
         {
-            attack atk = new attack(d1);
+            attack atk = new attack(slashAttack);
 
             attackList.Add(atk);
 
