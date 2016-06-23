@@ -107,17 +107,6 @@ public class attack
     [HideInInspector]
     public int numPopped = 0;
 
-    /*public attack(List<movement> moves)
-    {
-        moveList = new List<movement>();
-
-        for(int i=0; i<moves.Count; i++)
-        {
-            movement m = new movement(moves[i]);
-            moveList.Add(m);
-        }
-    }*/
-
     public attack(attack a)
     {
         moveList = new List<movement>();
@@ -186,8 +175,6 @@ public class SwordAttack : MonoBehaviour {
 
     public attack slashAttack;
 
-    //public movement[] slashMoves;
-
     List<attack> attackList = new List<attack>();
 
     Damager damage;
@@ -222,12 +209,6 @@ public class SwordAttack : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-        /*List<movement> d1 = new List<movement>();
-
-        for(int i=0; i<slashMoves.Length; i++)
-        {
-            d1.Add(slashMoves[i]);
-        }*/
 
         if (Input.GetMouseButtonDown(0))
         {
