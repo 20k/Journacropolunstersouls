@@ -4,6 +4,9 @@ using System;
 using System.Collections.Generic;
 using Object = UnityEngine.Object;
 
+/// <summary>
+/// use animation curves to define transition from start to end
+/// </summary>
 public class movement
 {
     [HideInInspector]
@@ -123,6 +126,11 @@ class attack
     }
 }
 
+/// <summary>
+/// Ok. Make sword attacks completely definable throught the interface
+/// what we want is the ability to define a curve in 2 dimensions (x/z) that defines the way the character moves when he attacks
+/// we also need to define move speed decreases, and whether or not we're allowed to move while attacking
+/// </summary>
 public class SwordAttack : MonoBehaviour {
 
     public Transform swordTransform;
