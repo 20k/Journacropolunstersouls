@@ -181,6 +181,14 @@ public class attack
     {
         return movementMult;
     }
+
+    public float getDamage()
+    {
+        if (moveList.Count == 0)
+            return 0;
+
+        return moveList[0].getDamage(); 
+    }
 }
 
 /// <summary>
@@ -264,6 +272,9 @@ public class SwordAttack : MonoBehaviour {
 
     public float GetDamage()
     {
-        return 10f;
+        if (attackList.Count == 0)
+            return 0;
+
+        return attackList[0].getDamage();
     }
 }
