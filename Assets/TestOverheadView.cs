@@ -272,7 +272,7 @@ namespace JamesCamera.TestOverheadView
 
         private void UpdateCharacter()
         {
-            cameraOrbit.UpdateCharacterRot(transform, input);
+            cameraOrbit.UpdateCharacterRot(transform, input, movementSettings.attack.getTurnCapDeg());
         }
 
         /// sphere cast down just beyond the bottom of the capsule to see if the capsule is colliding round the bottom

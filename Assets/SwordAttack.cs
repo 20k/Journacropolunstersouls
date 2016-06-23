@@ -7,6 +7,7 @@ using Object = UnityEngine.Object;
 /// <summary>
 /// use animation curves to define transition from start to end
 /// we'll eventually need separate hand pos, and sword direction
+/// or maybe we just need a curve to define essentially what is the smoothing func
 /// </summary>
 [Serializable]
 public class movement
@@ -18,6 +19,8 @@ public class movement
     /// </summary>
     public float timeSeconds = 1;
     public AnimationCurve movementMultiplierCurve;
+    public AnimationCurve turnAmountMultiplierCurve;
+    public float maxTurncapDeg = 360;
     public float damage = 10;
 
     private Quaternion startQuat;
@@ -42,6 +45,8 @@ public class movement
         endVec = a.endVec;
         timeSeconds = a.timeSeconds;
         movementMultiplierCurve = a.movementMultiplierCurve;
+        turnAmountMultiplierCurve = a.turnAmountMultiplierCurve;
+        maxTurncapDeg = a.maxTurncapDeg;
         damage = a.damage;
 
         startQuat.SetLookRotation(startVec);
@@ -81,6 +86,7 @@ public class movement
     {
         float t = frac_smooth(timeElapsed / timeSeconds);
 
+        ///t*t IS intentional here, its part of the smoothing
         Quaternion ipc = Quaternion.Slerp(startQuat, endQuat, t*t);
 
         return ipc;
@@ -88,9 +94,16 @@ public class movement
 
     public float getMovementMult()
     {
-        float t = frac_smooth(timeElapsed / timeSeconds);
+        float val = movementMultiplierCurve.Evaluate(timeElapsed / timeSeconds);
 
-        float val = movementMultiplierCurve.Evaluate(t);
+        val = val < 0 ? 0 : val;
+
+        return val;
+    }
+
+    public float getTurnCapDeg()
+    {
+        float val = turnAmountMultiplierCurve.Evaluate(timeElapsed / timeSeconds) * maxTurncapDeg;
 
         val = val < 0 ? 0 : val;
 
@@ -118,6 +131,7 @@ public class attack
     [HideInInspector]
     public int numPopped = 0;
     private float movementMult = 1;
+    private float turnMult = 360;
 
     public attack(attack a)
     {
@@ -148,6 +162,7 @@ public class attack
 
         Q = moveList[0].getRotation();
 
+        turnMult = moveList[0].getTurnCapDeg();
         movementMult = moveList[0].getMovementMult();
 
         if(moveList[0].isFinished())
@@ -182,6 +197,11 @@ public class attack
         return movementMult;
     }
 
+    public float getTurnCapDeg()
+    {
+        return turnMult;
+    }
+
     public float getDamage()
     {
         if (moveList.Count == 0)
@@ -199,6 +219,7 @@ public class attack
 public class SwordAttack : MonoBehaviour {
 
     public Transform swordTransform;
+    public float baseTurnCapDegSeconds = 360;
 
     public attack slashAttack;
 
@@ -268,6 +289,14 @@ public class SwordAttack : MonoBehaviour {
             return 1;
 
         return attackList[0].getMovementMult();
+    }
+
+    public float getTurnCapDeg()
+    {
+        if (attackList.Count == 0)
+            return baseTurnCapDegSeconds;
+
+        return attackList[0].getTurnCapDeg();
     }
 
     public float GetDamage()
