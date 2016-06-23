@@ -17,6 +17,8 @@ public class movement
     /// time to execute this part of the attack
     /// </summary>
     public float timeSeconds = 1;
+    public AnimationCurve movementMultiplierCurve;
+    public float damage = 10;
 
     private Quaternion startQuat;
     private Quaternion endQuat;
@@ -27,31 +29,24 @@ public class movement
     private bool going = false;
     private bool isInit = false;
 
-    private void init(Vector3 start, Vector3 end, float time)
-    {
-        startVec = start;
-        endVec = end;
-        timeSeconds = time;
-
-        startQuat.SetLookRotation(startVec);
-        endQuat.SetLookRotation(endVec);
-
-        isInit = true;
-    }
-
     public void startAtFinishOfPrev(movement prev)
     {
         startVec = prev.endVec;
     }
 
-    public movement(Vector3 start, Vector3 end, float time)
-    {
-        init(start, end, time);
-    }
-
     public movement(movement a)
     {
-        init(a.startVec, a.endVec, a.timeSeconds);
+        //init(a.startVec, a.endVec, a.timeSeconds, a.movementMultiplierCurve);
+
+        startVec = a.startVec;
+        endVec = a.endVec;
+        timeSeconds = a.timeSeconds;
+        movementMultiplierCurve = a.movementMultiplierCurve;
+        damage = a.damage;
+
+        startQuat.SetLookRotation(startVec);
+        endQuat.SetLookRotation(endVec);
+        isInit = true;
     }
 
     public void fire()
@@ -91,9 +86,25 @@ public class movement
         return ipc;
     }
 
+    public float getMovementMult()
+    {
+        float t = frac_smooth(timeElapsed / timeSeconds);
+
+        float val = movementMultiplierCurve.Evaluate(t);
+
+        val = val < 0 ? 0 : val;
+
+        return val;
+    }
+
     public bool isFinished()
     {
         return timeElapsed >= timeSeconds;
+    }
+
+    public float getDamage()
+    {
+        return damage;
     }
 }
 
@@ -106,6 +117,7 @@ public class attack
 
     [HideInInspector]
     public int numPopped = 0;
+    private float movementMult = 1;
 
     public attack(attack a)
     {
@@ -136,6 +148,8 @@ public class attack
 
         Q = moveList[0].getRotation();
 
+        movementMult = moveList[0].getMovementMult();
+
         if(moveList[0].isFinished())
         {
             moveList.RemoveAt(0);
@@ -161,6 +175,11 @@ public class attack
         {
             moveList[moveList.Count - 1].endVec = moveList[0].startVec;
         }
+    }
+
+    public float getMovementMult()
+    {
+        return movementMult;
     }
 }
 
@@ -233,6 +252,14 @@ public class SwordAttack : MonoBehaviour {
         }
 
         activateColliderIfDamaging();
+    }
+
+    public float getMovementMult()
+    {
+        if (attackList.Count == 0)
+            return 1;
+
+        return attackList[0].getMovementMult();
     }
 
     public float GetDamage()

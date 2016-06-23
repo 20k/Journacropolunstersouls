@@ -15,6 +15,7 @@ namespace JamesCamera.TestOverheadView
             public float RunMultiplier = 2.0f;   // Speed when sprinting
             public KeyCode RunKey = KeyCode.LeftShift;
             public float JumpForce = 30f;
+            public SwordAttack attack;
 
             public AnimationCurve SlopeCurveModifier = new AnimationCurve(new Keyframe(-90.0f, 1.0f), new Keyframe(0.0f, 1.0f), new Keyframe(90.0f, 0.0f));
             [HideInInspector]
@@ -40,6 +41,8 @@ namespace JamesCamera.TestOverheadView
                 {
                     m_Running = false;
                 }
+
+                CurrentTargetSpeed *= attack.getMovementMult();
 #endif
             }
 
