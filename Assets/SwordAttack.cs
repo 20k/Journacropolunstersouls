@@ -102,6 +102,7 @@ public class attack
 {
     //List<movement> moveList = new List<movement>();
     public List<movement> moveList;
+    public bool loops = false;
 
     [HideInInspector]
     public int numPopped = 0;
@@ -159,6 +160,19 @@ public class attack
     {
         return moveList.Count == 0;
     }
+
+    public void fixUpConnectivity()
+    {
+        for (int i = 1; i < moveList.Count; i++)
+        {
+            moveList[i].startAtFinishOfPrev(moveList[i - 1]);
+        }
+        
+        if(loops && moveList.Count > 0)
+        {
+            moveList[moveList.Count - 1].endVec = moveList[0].startVec;
+        }
+    }
 }
 
 /// <summary>
@@ -180,14 +194,11 @@ public class SwordAttack : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-	    //slash = new movement(new Vector3(1, 1, 1), new Vector3(-1, 0, 1), 0.3f);
+        //slash = new movement(new Vector3(1, 1, 1), new Vector3(-1, 0, 1), 0.3f);
         //slashRecoverP1 = new movement(slash.endVec, new Vector3(-0.4f, -0.3f, 1), 0.2f);
         //slashRecoverP2 = new movement(slashRecoverP1.endVec, slash.startVec, 0.5f);
 
-        for(int i=1; i<slashAttack.moveList.Count; i++)
-        {
-            slashAttack.moveList[i].startAtFinishOfPrev(slashAttack.moveList[i-1]);
-        }
+        slashAttack.fixUpConnectivity();
 
         damage = GetComponent<Damager>();
     }
