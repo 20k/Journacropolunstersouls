@@ -128,7 +128,7 @@ namespace JamesCamera.TestOverheadView
                 angleDiff = rotationCap * s * Mathf.Deg2Rad * Time.deltaTime;
             }
 
-            Debug.Log("diff " + angleDiff + " " + rotationCap * Mathf.Deg2Rad * Time.deltaTime);
+            //Debug.Log("diff " + angleDiff + " " + rotationCap * Mathf.Deg2Rad * Time.deltaTime);
 
             currentTurnAngleAcc += angleDiff;
 

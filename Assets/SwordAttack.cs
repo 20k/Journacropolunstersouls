@@ -20,6 +20,10 @@ public class movement
     public float timeSeconds = 1;
     public AnimationCurve movementMultiplierCurve;
     public AnimationCurve turnAmountMultiplierCurve;
+    /// <summary>
+    /// defines the interpolation between start and end
+    /// </summary>
+    public AnimationCurve interpolateCurve;
     public float maxTurncapDeg = 360;
     public float damage = 10;
 
@@ -46,6 +50,7 @@ public class movement
         timeSeconds = a.timeSeconds;
         movementMultiplierCurve = a.movementMultiplierCurve;
         turnAmountMultiplierCurve = a.turnAmountMultiplierCurve;
+        interpolateCurve = a.interpolateCurve;
         maxTurncapDeg = a.maxTurncapDeg;
         damage = a.damage;
 
@@ -86,8 +91,17 @@ public class movement
     {
         float t = frac_smooth(timeElapsed / timeSeconds);
 
+        t = t * t;
+
+        //float t = timeElapsed / timeSeconds;
+
+        if (t >= 1)
+            t = 1;
+
+        float newt = interpolateCurve.Evaluate(t);
+
         ///t*t IS intentional here, its part of the smoothing
-        Quaternion ipc = Quaternion.Slerp(startQuat, endQuat, t*t);
+        Quaternion ipc = Quaternion.SlerpUnclamped(startQuat, endQuat, newt);
 
         return ipc;
     }
@@ -222,6 +236,7 @@ public class SwordAttack : MonoBehaviour {
     public float baseTurnCapDegSeconds = 360;
 
     public attack slashAttack;
+    public attack MH1;
 
     List<attack> attackList = new List<attack>();
 
@@ -234,6 +249,7 @@ public class SwordAttack : MonoBehaviour {
         //slashRecoverP2 = new movement(slashRecoverP1.endVec, slash.startVec, 0.5f);
 
         slashAttack.fixUpConnectivity();
+        MH1.fixUpConnectivity();
 
         damage = GetComponent<Damager>();
     }
@@ -260,7 +276,7 @@ public class SwordAttack : MonoBehaviour {
 
         if (attackList.Count == 0 && Input.GetMouseButtonDown(0))
         {
-            attack atk = new attack(slashAttack);
+            attack atk = new attack(MH1);
 
             attackList.Add(atk);
 
