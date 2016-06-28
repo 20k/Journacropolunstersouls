@@ -257,7 +257,7 @@ public class SwordAttack : MonoBehaviour {
         if (attackList.Count == 0)
             return false;
 
-        return attackList[0].numPopped == 0;
+        return attackList[0].getDamage() > Mathf.Epsilon;
     }
 
     void activateColliderIfDamaging()
