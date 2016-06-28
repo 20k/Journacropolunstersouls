@@ -231,6 +231,7 @@ public class SwordAttack : MonoBehaviour {
 
     public Transform swordTransform;
     public float baseTurnCapDegSeconds = 360;
+    public MainCharacterProceduralLegController legController;
 
     public attack slashAttack;
     public attack MH1;

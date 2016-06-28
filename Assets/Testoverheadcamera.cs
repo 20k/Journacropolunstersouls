@@ -79,26 +79,28 @@ namespace JamesCamera.TestOverheadView
 
             float yDiff = CrossPlatformInputManager.GetAxisRaw("Mouse X") * XSensitivity;
 
+            yAcc %= 360f;
+
+            if(yAcc < 0)
+            {
+                yAcc = 360f + yAcc;
+            }
+
             yAcc += yDiff;
             xAcc += CrossPlatformInputManager.GetAxisRaw("Mouse Y") * YSensitivity;
 
             zoomAcc += CrossPlatformInputManager.GetAxisRaw("Mouse ScrollWheel");
 
-            yAcc %= 360f;
-
-            //Quaternion yQuat = Quaternion.Euler(0, yAcc, 0);
-
-
             float desiredAngle = (float)Math.Atan2(input.y, -input.x) - (float)Math.PI/2f;
 
             desiredAngle += yAcc * Mathf.Deg2Rad;
+
+            //desiredAngle %= 2f * Mathf.PI;
 
             if (Math.Abs(input.y) < Mathf.Epsilon && Math.Abs(input.x) < Mathf.Epsilon)
             {
                 desiredAngle = currentTurnAngleAcc;
             }
-
-            //desiredAngle += yDiff;
 
             float currentAngle = currentTurnAngleAcc;
 
@@ -120,13 +122,6 @@ namespace JamesCamera.TestOverheadView
             if(Math.Abs(turnDir) > Math.Abs(diff))
                 turnDir = turnDir * Math.Abs(diff);
 
-            /*if (Mathf.Abs(turnDir) > rotationCap * Mathf.Deg2Rad)
-            {
-                float s = Mathf.Sign(turnDir);
-
-                turnDir = rotationCap * s * Mathf.Deg2Rad;
-            }*/
-
             float angleDiff = turnDir * Time.deltaTime * 0.5f * (float)Math.PI / character90TurnTimeSeconds;
 
             if(Mathf.Abs(angleDiff) > rotationCap * Mathf.Deg2Rad * Time.deltaTime)
@@ -142,11 +137,7 @@ namespace JamesCamera.TestOverheadView
 
             Quaternion inputQuat = Quaternion.Euler(0, currentTurnAngleAcc * Mathf.Rad2Deg, 0);
 
-            Quaternion nextQuat = inputQuat;
-
-            //Quaternion nextQuat = yQuat * inputQuat;
-
-            character.localRotation = nextQuat;
+            character.localRotation = inputQuat;
 
             UpdateCursorLock();
         }

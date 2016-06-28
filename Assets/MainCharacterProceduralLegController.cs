@@ -8,6 +8,7 @@ public class MainCharacterProceduralLegController : MonoBehaviour
     public float baseForwardOffset = -1;
     public float bobHeight = 1;
     public Transform body;
+    public SwordAttack swordAttack;
 
     List<ProceduralLeg> legs;
 
@@ -48,9 +49,8 @@ public class MainCharacterProceduralLegController : MonoBehaviour
         }
 
         if (moveDir.magnitude < 0.01f)
-        {
             SetIdling(true);
-        }
+        
         else
             SetIdling(false);
 
@@ -67,6 +67,15 @@ public class MainCharacterProceduralLegController : MonoBehaviour
             else
             {
                 legs[i].forwardOffset = baseForwardOffset;
+            }
+
+            legs[i].forwardOffset *= swordAttack.getMovementMult();
+
+            if(swordAttack.getMovementMult() < 0.1f)
+            {
+                float dir = ((float)i - 0.5f) * 2f;
+
+                legs[i].forwardOffset = dir * baseForwardOffset;
             }
         }
 
