@@ -77,24 +77,30 @@ namespace JamesCamera.TestOverheadView
                 currentTurnAngleAcc = 2f * (float)Math.PI + currentTurnAngleAcc;
             }
 
-            yAcc += CrossPlatformInputManager.GetAxisRaw("Mouse X") * XSensitivity;
+            float yDiff = CrossPlatformInputManager.GetAxisRaw("Mouse X") * XSensitivity;
+
+            yAcc += yDiff;
             xAcc += CrossPlatformInputManager.GetAxisRaw("Mouse Y") * YSensitivity;
 
             zoomAcc += CrossPlatformInputManager.GetAxisRaw("Mouse ScrollWheel");
 
-            Quaternion yQuat = Quaternion.Euler(0, yAcc, 0);
+            //Quaternion yQuat = Quaternion.Euler(0, yAcc, 0);
 
 
             float desiredAngle = (float)Math.Atan2(input.y, -input.x) - (float)Math.PI/2f;
+
+            desiredAngle += yAcc * Mathf.Deg2Rad;
 
             if (Math.Abs(input.y) < Mathf.Epsilon && Math.Abs(input.x) < Mathf.Epsilon)
             {
                 desiredAngle = currentTurnAngleAcc;
             }
 
+            //desiredAngle += yDiff;
+
             float currentAngle = currentTurnAngleAcc;
 
-            float diff = desiredAngle - currentAngle;
+            float diff = (desiredAngle - currentAngle);
 
             float d1 = (desiredAngle + 2f * (float)Math.PI) - currentAngle;
             float d2 = (desiredAngle - 2f * (float)Math.PI) - currentAngle;
@@ -134,8 +140,9 @@ namespace JamesCamera.TestOverheadView
 
             Quaternion inputQuat = Quaternion.Euler(0, currentTurnAngleAcc * Mathf.Rad2Deg, 0);
 
+            Quaternion nextQuat = inputQuat;
 
-            Quaternion nextQuat = yQuat * inputQuat;
+            //Quaternion nextQuat = yQuat * inputQuat;
 
             character.localRotation = nextQuat;
 
