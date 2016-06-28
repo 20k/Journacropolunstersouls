@@ -76,6 +76,8 @@ public class MainCharacterProceduralLegController : MonoBehaviour
                 float dir = ((float)i - 0.5f) * 2f;
 
                 legs[i].forwardOffset = dir * baseForwardOffset;
+
+                legs[i].SetIdling(false);
             }
         }
 
