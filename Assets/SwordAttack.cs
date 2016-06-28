@@ -93,14 +93,11 @@ public class movement
 
         t = t * t;
 
-        //float t = timeElapsed / timeSeconds;
-
         if (t >= 1)
             t = 1;
 
         float newt = interpolateCurve.Evaluate(t);
 
-        ///t*t IS intentional here, its part of the smoothing
         Quaternion ipc = Quaternion.SlerpUnclamped(startQuat, endQuat, newt);
 
         return ipc;

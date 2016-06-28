@@ -84,6 +84,8 @@ namespace JamesCamera.TestOverheadView
 
             zoomAcc += CrossPlatformInputManager.GetAxisRaw("Mouse ScrollWheel");
 
+            yAcc %= 360f;
+
             //Quaternion yQuat = Quaternion.Euler(0, yAcc, 0);
 
 
