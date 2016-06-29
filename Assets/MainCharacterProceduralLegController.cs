@@ -6,8 +6,11 @@ public class MainCharacterProceduralLegController : MonoBehaviour
 {
     public LegHub legHub;
     public float baseForwardOffset = -1;
-    public float bobHeight = 1;
+    public float bobHeight = 0.1f;
+    public float headBobHeight = 0.05f;
+    public float headLagTimeSeconds = 0.1f;
     public Transform body;
+    public Transform head;
     public SwordAttack swordAttack;
 
     List<ProceduralLeg> legs;
@@ -20,16 +23,22 @@ public class MainCharacterProceduralLegController : MonoBehaviour
     float runMult = 1f;
     bool isRunning = false;
 
-    Vector3 baseOffset;
+    Vector3 baseBodyOffset;
+    Vector3 baseHeadOffset;
 
     float interFeetDistance = 1;
+
+    float timeSincePop = 0;
+
+    Queue<float> bobFracHistory = new Queue<float>();
 
     // Use this for initialization
     void Start()
     {
         legs = legHub.GetLegs();
 
-        baseOffset = body.localPosition;
+        baseBodyOffset = body.localPosition;
+        baseHeadOffset = head.localPosition;
 
         if (legs.Count != 2)
             return;
@@ -90,17 +99,27 @@ public class MainCharacterProceduralLegController : MonoBehaviour
 
         lastPosition = transform.position;
 
-        //body.Translate(new Vector3(0, getBob(), 0));
-
-
-        //Vector3 npos = body.localPosition;
         Vector3 npos = new Vector3(0, 0, 0);
 
         npos.y = getBob();
 
-        body.transform.localPosition = baseOffset + npos;
+        body.transform.localPosition = baseBodyOffset + npos;
 
-        //body.Translate(new Vector3(0, yval, 0));
+        Vector3 headNew = new Vector3(0, 0, 0);
+
+        if(timeSincePop > headLagTimeSeconds && bobFracHistory.Count > 0)
+        {
+            headNew.y = bobFracHistory.Dequeue() * headBobHeight;
+
+            head.transform.localPosition = baseHeadOffset + headNew;
+
+            ///well, approximation here ;_;
+            timeSincePop -= Time.deltaTime;
+        }
+
+        timeSincePop += Time.deltaTime;
+
+        bobFracHistory.Enqueue(getBobFrac());
     }
 
     public void SetMoveDir(Vector2 input, float pRunMult, bool running)
@@ -117,15 +136,20 @@ public class MainCharacterProceduralLegController : MonoBehaviour
         isIdle = idle;
     }
 
-    public float getBob()
+    ///...
+    ///really we want to tilt body too
+    public float getBobFrac()
     {
-        ///...
-        ///really we want to tilt body too
         float fdist = (legs[0].transform.GetChild(1).position - legs[1].transform.GetChild(1).position).magnitude;
 
         float frac = 1f - (interFeetDistance / fdist);
 
-        return Mathf.Clamp(frac, 0f, 1f) * bobHeight;
+        return Mathf.Clamp(frac, 0f, 1f);
+    }
+
+    public float getBob()
+    {
+        return getBobFrac() * bobHeight;
     }
 
 }
