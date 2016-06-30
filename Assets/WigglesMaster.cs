@@ -117,6 +117,7 @@ public class WigglesMaster : MonoBehaviour {
     public Transform body;
     public bool aiEnabled = false;
     public LegHub legHub;
+    public StatusEffectManager effectManager;
 
     /// <summary>
     /// name, animation curve, time, distance
@@ -170,6 +171,7 @@ public class WigglesMaster : MonoBehaviour {
     WaitSlots currentWaitSlots = new WaitSlots();
 
     moveset currentMoveFunc;
+
 
     /// <summary>
     /// ? 
@@ -287,6 +289,16 @@ public class WigglesMaster : MonoBehaviour {
     {
         ///need to use delegate
         //FaceAndBodyslam();
+
+        ///recoil, do this after fixing stun
+        if(effectManager.IsStunned())
+        {
+            currentWaitSlots.Reset();
+
+            currentMoveFunc = None;
+
+            return;
+        }
 
         currentMoveFunc();
 
