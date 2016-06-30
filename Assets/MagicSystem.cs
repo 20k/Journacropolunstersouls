@@ -70,7 +70,7 @@ public class MagicSystem : MonoBehaviour {
         if (q && placed == 1)
         {
             ///+ front distance offset
-            SpawnBetween(firstPos, position.position, 2, 3, 5);
+            SpawnBetween(firstPos, position.position, iceCube.transform.localScale.x*1.5f, 3, 5);
 
             placed = 0;
 
