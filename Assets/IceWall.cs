@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class StatusEffect : MonoBehaviour
+public class StatusEffectStun : MonoBehaviour
 {
     public string activateTag;
 
@@ -34,13 +34,6 @@ public class StatusEffect : MonoBehaviour
         manage.Stun();
 
         gameObject.SetActive(false);
-
-        /*WigglesMaster wg = other.gameObject.GetComponent<WigglesMaster>();
-
-        if (wg == null)
-            return;
-
-        Debug.Log("wiggles enter");*/
     }
 }
 
@@ -149,7 +142,7 @@ public class IceWall : MonoBehaviour {
 
             GameObject gobj = new GameObject();
 
-            StatusEffect effect = gobj.AddComponent<StatusEffect>();
+            StatusEffectStun effect = gobj.AddComponent<StatusEffectStun>();
             effect.activateTag = activateTag;
 
             gobj.SetActive(true);

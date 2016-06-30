@@ -2,6 +2,10 @@
 using System.Collections;
 using System;
 
+/// <summary>
+/// so, we hold all the different kinds of status effect in here?
+/// and then wiggles master defines how we react
+/// </summary>
 public class StatusEffectManager : MonoBehaviour {
 
     public float stunTimeSeconds = 8;

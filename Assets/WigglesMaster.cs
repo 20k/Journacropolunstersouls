@@ -297,6 +297,12 @@ public class WigglesMaster : MonoBehaviour {
 
             currentMoveFunc = None;
 
+            ///Ehh. Really we want it to flail forwards into the wall
+            ///or obstacle, so it really gets the whole visual effect
+            ///so below is correct technically, but practically wrong
+            ///maybe make it do 0 damage?
+            //CancelAttacks();
+
             return;
         }
 
@@ -449,6 +455,11 @@ public class WigglesMaster : MonoBehaviour {
         attackFrac = 0;
         isAttack = true;
         startPosition = wiggles.position;
+    }
+
+    void CancelAttacks()
+    {
+        isAttack = false;
     }
 
     float getMult()
