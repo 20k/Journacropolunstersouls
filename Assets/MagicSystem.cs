@@ -24,13 +24,9 @@ public class MagicSystem : MonoBehaviour {
 
     void SpawnBetween(Vector3 p1, Vector3 p2, float hsep, float vsep, int height)
     {
-        //float size = 3;
-
         float dist = (p2 - p1).magnitude;
 
         float num = Mathf.Floor(dist / hsep);
-
-        //float spacing = dist / num;
 
         Vector3 cur = p1;
         Vector3 dir = (p2 - p1) / num;
