@@ -114,6 +114,10 @@ public class MainCharacterProceduralLegController : MonoBehaviour
             head.transform.localPosition = baseHeadOffset + headNew;
 
             ///well, approximation here ;_;
+            ///maybe this should like, be *2? Or not? I have no idea
+            ///but basically this should keep a constant number of ticks away
+            ///which will vary with frametime sadly (although constant across refresh rates), but its not worth doing a proper solution
+            ///i don't think?
             timeSincePop -= Time.deltaTime;
         }
 
