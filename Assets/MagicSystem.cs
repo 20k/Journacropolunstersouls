@@ -15,9 +15,14 @@ public class MagicSystem : MonoBehaviour {
         iceCube = GameObject.Find("IceCube");
     }
 	
-    void Spawn(Vector3 pos)
+    void Spawn(Vector3 pos, float yangle)
     {
-        GameObject obj = Instantiate(iceCube, pos, Quaternion.identity) as GameObject;
+        float mangle = yangle * Mathf.Rad2Deg;
+
+        Quaternion quat;
+        quat = Quaternion.Euler(0, mangle, 0);
+
+        GameObject obj = Instantiate(iceCube, pos, quat) as GameObject;
 
         obj.SetActive(true);
     }
@@ -31,13 +36,16 @@ public class MagicSystem : MonoBehaviour {
         Vector3 cur = p1;
         Vector3 dir = (p2 - p1) / num;
 
+        ///cubes are symmetric, so who cares?
+        float yangle = -Mathf.Atan2(dir.z, dir.x);
+
         for(int i=0; i<(int)num; i++)
         {
             Vector3 hpos = cur;
 
             for(int h=0; h<height; h++)
             {
-                Spawn(hpos);
+                Spawn(hpos, yangle);
 
                 hpos.y += vsep;
             }
