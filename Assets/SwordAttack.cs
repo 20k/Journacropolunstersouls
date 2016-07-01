@@ -263,7 +263,8 @@ public class attack
         if (moveList.Count == 0)
             return 0;
 
-        Debug.Log(extraDamagePerChargeLevel);
+        if (moveList[0].getDamage() <= Mathf.Epsilon)
+            return 0;
 
         return moveList[0].getDamage() + extraDamagePerChargeLevel * chargeLevel; 
     }
