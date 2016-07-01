@@ -27,8 +27,6 @@ public class StatusEffectManager : MonoBehaviour {
 
         myStunCubes[0] = o1;
         myStunCubes[1] = o2;
-
-        Stun();
     }
 	
 	// Update is called once per frame

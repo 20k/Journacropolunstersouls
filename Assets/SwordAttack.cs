@@ -27,6 +27,13 @@ public class movement
     public float maxTurncapDeg = 360;
     public float damage = 10;
 
+    //public bool canBeCharged = false;
+    public int chargeLevels = 0;
+    //public float chargeTime = 0.0f;
+
+    [HideInInspector]
+    public int currentChargeLevel = 0;
+
     private Quaternion startQuat;
     private Quaternion endQuat;
 
@@ -44,7 +51,6 @@ public class movement
     public movement(movement a)
     {
         //init(a.startVec, a.endVec, a.timeSeconds, a.movementMultiplierCurve);
-
         startVec = a.startVec;
         endVec = a.endVec;
         timeSeconds = a.timeSeconds;
@@ -54,9 +60,20 @@ public class movement
         maxTurncapDeg = a.maxTurncapDeg;
         damage = a.damage;
 
+        //canBeCharged = a.canBeCharged;
+        chargeLevels = a.chargeLevels;
+        //chargeTime = a.chargeTime;
+        currentChargeLevel = a.currentChargeLevel;
+
         startQuat.SetLookRotation(startVec);
         endQuat.SetLookRotation(endVec);
         isInit = true;
+    }
+
+    public void updateQuats()
+    {
+        startQuat.SetLookRotation(startVec);
+        endQuat.SetLookRotation(endVec);
     }
 
     public void fire()
@@ -130,6 +147,16 @@ public class movement
     {
         return damage;
     }
+
+    public bool isChargeable()
+    {
+        return currentChargeLevel < chargeLevels;
+    }
+
+    public bool isCharging()
+    {
+        return currentChargeLevel > 0;
+    }
 }
 
 [Serializable]
@@ -143,6 +170,7 @@ public class attack
     public int numPopped = 0;
     private float movementMult = 1;
     private float turnMult = 360;
+    private int chargeLevel = 0;
 
     public attack(attack a)
     {
@@ -155,7 +183,7 @@ public class attack
         }
     }
 
-    public Quaternion tick(float ftime)
+    public Quaternion tick(float ftime, bool requestChargeup, movement chargeupMove)
     {
         Quaternion Q = Quaternion.identity;
 
@@ -175,6 +203,11 @@ public class attack
 
         turnMult = moveList[0].getTurnCapDeg();
         movementMult = moveList[0].getMovementMult();
+
+        if(requestChargeup)
+        {
+            insertChargingIfAppropriate(chargeupMove);
+        }
 
         if(moveList[0].isFinished())
         {
@@ -220,6 +253,50 @@ public class attack
 
         return moveList[0].getDamage(); 
     }
+
+    public bool isChargeable()
+    {
+        if (moveList.Count == 0)
+            return false;
+
+        return moveList[0].isChargeable();
+    }
+
+    /// <summary>
+    /// Ie we're a charging stage
+    /// </summary>
+    /// <returns></returns>
+    public bool isCharging()
+    {
+        if(moveList.Count == 0)
+            return false;
+
+        return moveList[0].isCharging();
+    }
+
+    public void insertChargingIfAppropriate(movement m)
+    {
+        if (!isChargeable())
+            return;
+
+        if (moveList[0].isFinished())
+        {
+            chargeLevel++;
+
+            movement c = new movement(m);
+
+            c.startVec = moveList[0].endVec;
+            c.endVec = moveList[0].endVec;
+            c.currentChargeLevel = chargeLevel;
+            c.chargeLevels = moveList[0].chargeLevels;
+            c.updateQuats();
+
+            moveList.Insert(1, c);
+        }
+    }
+
+    ///ie if we can cancel because we're charging, do it
+    ///void cancelifcharging
 }
 
 /// <summary>
@@ -235,6 +312,10 @@ public class SwordAttack : MonoBehaviour {
 
     public attack slashAttack;
     public attack MH1;
+    /// <summary>
+    /// Start/end are irrelevant here, only movement curve/damage etc are important
+    /// </summary>
+    public attack chargeup;
 
     List<attack> attackList = new List<attack>();
 
@@ -250,6 +331,12 @@ public class SwordAttack : MonoBehaviour {
         MH1.fixUpConnectivity();
 
         damage = GetComponent<Damager>();
+
+        if(chargeup.moveList.Count < 1)
+        {
+            Debug.Log("Chargeup is definitely going to crash, movelist < 1");
+            ///should find out how to throw c# exceptions and throw one
+        }
     }
 
     bool isDamaging()
@@ -272,7 +359,10 @@ public class SwordAttack : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-        if (attackList.Count == 0 && Input.GetMouseButtonDown(0))
+        bool lclick = Input.GetMouseButtonDown(0);
+        bool lheld = Input.GetMouseButton(0);
+
+        if (attackList.Count == 0 && lclick)
         {
             attack atk = new attack(MH1);
 
@@ -283,7 +373,7 @@ public class SwordAttack : MonoBehaviour {
 
         for(int i=0; i<attackList.Count; i++)
         {
-            Quaternion Q = attackList[i].tick(Time.deltaTime);
+            Quaternion Q = attackList[i].tick(Time.deltaTime, lheld, chargeup.moveList[0]);
 
             swordTransform.localRotation = Q;
 

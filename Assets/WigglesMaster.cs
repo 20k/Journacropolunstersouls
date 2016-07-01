@@ -299,8 +299,9 @@ public class WigglesMaster : MonoBehaviour {
 
             ///Ehh. Really we want it to flail forwards into the wall
             ///or obstacle, so it really gets the whole visual effect
-            ///so below is correct technically, but practically wrong
+            ///so below is correct technically, but practically wrong in the short term
             ///maybe make it do 0 damage?
+            ///we really just need a recoil/flail
             //CancelAttacks();
 
             return;
