@@ -175,7 +175,7 @@ public class attack
     public int numPopped = 0;
     private float movementMult = 1;
     private float turnMult = 360;
-    private int chargeLevel = 0;
+    public int chargeLevel = 0;
 
     public attack(attack a)
     {
@@ -340,6 +340,8 @@ public class SwordAttack : MonoBehaviour {
 
     Damager damage;
 
+    Light chargeLight;
+
 	// Use this for initialization
 	void Start () {
         //slash = new movement(new Vector3(1, 1, 1), new Vector3(-1, 0, 1), 0.3f);
@@ -348,6 +350,8 @@ public class SwordAttack : MonoBehaviour {
 
         slashAttack.fixUpConnectivity();
         MH1.fixUpConnectivity();
+
+        chargeLight = GetComponentInChildren<Light>();
 
         damage = GetComponent<Damager>();
 
@@ -396,6 +400,8 @@ public class SwordAttack : MonoBehaviour {
 
             swordTransform.localRotation = Q;
 
+            DoLightChargingEffect(attackList[i]);
+
             if(attackList[i].isFinished())
             {
                 attackList.RemoveAt(i);
@@ -428,5 +434,36 @@ public class SwordAttack : MonoBehaviour {
             return 0;
 
         return attackList[0].getDamage();
+    }
+
+    Vector4 GetChargeCol(int level)
+    {
+        if (level == 0)
+            return new Vector4(1, 1, 1, 1);
+        if (level == 1)
+            return new Vector4(255 / 255f, 179 / 255f, 71 / 255f, 1);
+        if (level == 2)
+            return new Vector4(255 / 255f, 105 / 255f, 97 / 255f, 1);
+        if (level == 3)
+            return new Vector4(150 / 255f, 111 / 255f, 214 / 255f, 1);
+
+        return new Vector4(0, 0, 0, 1);
+    }
+
+    public void DoLightChargingEffect(attack a)
+    {
+        if (chargeLight == null)
+            return;
+
+        if(!a.isCharging())
+        {
+            chargeLight.range = 0;
+            return;
+        }
+
+        float mult = a.chargeLevel / 3f;
+
+        chargeLight.range = a.chargeLevel * 3;
+        chargeLight.color = GetChargeCol(a.chargeLevel);
     }
 }
