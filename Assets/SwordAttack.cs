@@ -65,8 +65,12 @@ public class movement
         //chargeTime = a.chargeTime;
         currentChargeLevel = a.currentChargeLevel;
 
-        startQuat.SetLookRotation(startVec);
-        endQuat.SetLookRotation(endVec);
+        if(startVec.magnitude > Mathf.Epsilon)
+            startQuat.SetLookRotation(startVec);
+
+        if(endVec.magnitude > Mathf.Epsilon)
+            endQuat.SetLookRotation(endVec);
+
         isInit = true;
     }
 
@@ -165,6 +169,7 @@ public class attack
     //List<movement> moveList = new List<movement>();
     public List<movement> moveList;
     public bool loops = false;
+    public float extraDamagePerChargeLevel = 10;
 
     [HideInInspector]
     public int numPopped = 0;
@@ -207,6 +212,10 @@ public class attack
         if(requestChargeup)
         {
             insertChargingIfAppropriate(chargeupMove);
+        }
+        else
+        {
+            removeChargingIfAppropriate();
         }
 
         if(moveList[0].isFinished())
@@ -251,7 +260,7 @@ public class attack
         if (moveList.Count == 0)
             return 0;
 
-        return moveList[0].getDamage(); 
+        return moveList[0].getDamage() + extraDamagePerChargeLevel * chargeLevel; 
     }
 
     public bool isChargeable()
@@ -293,6 +302,16 @@ public class attack
 
             moveList.Insert(1, c);
         }
+    }
+
+    public void removeChargingIfAppropriate()
+    {
+        if (!isCharging())
+            return;
+
+        chargeLevel--;
+
+        moveList.RemoveAt(0);
     }
 
     ///ie if we can cancel because we're charging, do it
