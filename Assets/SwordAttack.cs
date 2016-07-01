@@ -392,7 +392,10 @@ public class SwordAttack : MonoBehaviour {
             attackList.Add(atk);
 
             damage.ResetHit();
+        }
 
+        if(attackList.Count == 0)
+        {
             chargeLight.range = 0;
         }
 
