@@ -175,11 +175,14 @@ public class attack
     public int numPopped = 0;
     private float movementMult = 1;
     private float turnMult = 360;
+    [HideInInspector]
     public int chargeLevel = 0;
 
     public attack(attack a)
     {
         moveList = new List<movement>();
+        loops = a.loops;
+        extraDamagePerChargeLevel = a.extraDamagePerChargeLevel;
 
         for (int i = 0; i < a.moveList.Count; i++)
         {
@@ -259,6 +262,8 @@ public class attack
     {
         if (moveList.Count == 0)
             return 0;
+
+        Debug.Log(extraDamagePerChargeLevel);
 
         return moveList[0].getDamage() + extraDamagePerChargeLevel * chargeLevel; 
     }
