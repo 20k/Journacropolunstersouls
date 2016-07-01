@@ -392,6 +392,8 @@ public class SwordAttack : MonoBehaviour {
             attackList.Add(atk);
 
             damage.ResetHit();
+
+            chargeLight.range = 0;
         }
 
         for(int i=0; i<attackList.Count; i++)
@@ -455,15 +457,19 @@ public class SwordAttack : MonoBehaviour {
         if (chargeLight == null)
             return;
 
-        if(!a.isCharging())
+        if(a.chargeLevel == 0)
         {
             chargeLight.range = 0;
             return;
         }
 
-        float mult = a.chargeLevel / 3f;
+        float cfrac = a.chargeLevel / 4f;
 
-        chargeLight.range = a.chargeLevel * 3;
+        float range = a.chargeLevel * 4f + 2;
+        float intensity = cfrac * 1f + 0.5f;
+
+        chargeLight.range = range;
         chargeLight.color = GetChargeCol(a.chargeLevel);
+        chargeLight.intensity = intensity*2;
     }
 }
