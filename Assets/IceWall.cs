@@ -31,6 +31,9 @@ public class StatusEffectStun : MonoBehaviour
         if (manage == null)
             return;
 
+        Debug.Log("Status");
+
+
         manage.Stun();
 
         gameObject.SetActive(false);
@@ -46,7 +49,7 @@ public class StatusEffectStun : MonoBehaviour
 public class IceWall : MonoBehaviour {
 
     public Transform position;
-    public string activateTag = "EnemyDamaging"; //bossmonster type
+    public string activateTag = "StatusAffected"; //bossmonster type
 
     GameObject iceCube;
     int placed = 0;
