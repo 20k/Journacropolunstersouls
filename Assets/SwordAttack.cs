@@ -334,6 +334,7 @@ public class SwordAttack : MonoBehaviour {
     public Transform swordTransform;
     public float baseTurnCapDegSeconds = 360;
     public MainCharacterProceduralLegController legController;
+    public Camera cam;
 
     public attack slashAttack;
     public attack MH1;
@@ -347,6 +348,8 @@ public class SwordAttack : MonoBehaviour {
     Damager damage;
 
     Light chargeLight;
+    //ParticleSystem emit;
+    GameObject billboard;
 
 	// Use this for initialization
 	void Start () {
@@ -360,12 +363,23 @@ public class SwordAttack : MonoBehaviour {
         chargeLight = GetComponentInChildren<Light>();
 
         damage = GetComponent<Damager>();
+        //emit = GetComponentInChildren<ParticleSystem>();
+
+        billboard = GameObject.Find("LightBillboard");
+        billboard.SetActive(false);
 
         if(chargeup.moveList.Count < 1)
         {
             Debug.Log("Chargeup is definitely going to crash, movelist < 1");
             ///should find out how to throw c# exceptions and throw one
         }
+
+        /*if(emit == null)
+        {
+            Debug.Log("no emitter, likely crash");
+        }*/
+
+        //emit.Stop();
     }
 
     bool isDamaging()
@@ -403,6 +417,8 @@ public class SwordAttack : MonoBehaviour {
         if(attackList.Count == 0)
         {
             chargeLight.range = 0;
+
+            //emit.Stop();
         }
 
         for(int i=0; i<attackList.Count; i++)
@@ -466,9 +482,12 @@ public class SwordAttack : MonoBehaviour {
         if (chargeLight == null)
             return;
 
-        if(a.chargeLevel == 0)
+        if (a.chargeLevel == 0)
         {
             chargeLight.range = 0;
+
+            //emit.Stop();
+
             return;
         }
 
@@ -479,6 +498,33 @@ public class SwordAttack : MonoBehaviour {
 
         chargeLight.range = range;
         chargeLight.color = GetChargeCol(a.chargeLevel);
-        chargeLight.intensity = intensity*2;
+        chargeLight.intensity = intensity * 2;
+
+        /*if (!emit.isPlaying)
+            emit.Emit(1);
+
+        emit.startColor = GetChargeCol(a.chargeLevel);
+
+        ParticleSystem.Particle[] parts = new ParticleSystem.Particle[emit.particleCount];
+        emit.GetParticles(parts);
+
+        for(int i=0; i<parts.Length; i++)
+        {
+            Vector4 col = GetChargeCol(a.chargeLevel);
+
+            parts[i].startColor = new Color(col.x, col.y, col.z);
+        }
+
+        emit.SetParticles(parts, parts.Length);*/
+
+        billboard.SetActive(true);
+
+        UpdateBillboard();
+    }
+
+    void UpdateBillboard()
+    {
+        billboard.transform.LookAt(billboard.transform.position + cam.transform.rotation * Vector3.forward,
+            cam.transform.rotation * Vector3.up);
     }
 }
