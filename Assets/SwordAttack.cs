@@ -437,6 +437,8 @@ public class SwordAttack : MonoBehaviour {
         }
 
         activateColliderIfDamaging();
+
+        UpdateBillboard();
     }
 
     public float getMovementMult()
@@ -519,12 +521,16 @@ public class SwordAttack : MonoBehaviour {
 
         billboard.SetActive(true);
 
-        UpdateBillboard();
+        //UpdateBillboard();
     }
 
     void UpdateBillboard()
     {
-        billboard.transform.LookAt(billboard.transform.position + cam.transform.rotation * Vector3.forward,
-            cam.transform.rotation * Vector3.up);
+        //Quaternion q = Quaternion.LookRotation(billboard.transform.position + cam.transform.rotation * Vector3.forward,
+        //    cam.transform.rotation * Vector3.up);
+
+        Quaternion q = Quaternion.LookRotation(cam.transform.rotation * Vector3.up);
+
+        billboard.transform.rotation = q;
     }
 }

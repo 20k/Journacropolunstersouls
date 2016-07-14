@@ -1,5 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+
+/// <summary>
+/// true indicates that the onhit should be terminated
+/// </summary>
+/// <returns></returns>
+public delegate bool onHitter();
 
 public class Damageable : MonoBehaviour {
 
@@ -9,6 +16,9 @@ public class Damageable : MonoBehaviour {
 
     bool isInvuln = false;
     float invulnFrac = 0;
+
+
+    List<onHitter> registeredNotifiers = new List<onHitter>();
 
 	// Use this for initialization
 	void Start () {
@@ -49,7 +59,17 @@ public class Damageable : MonoBehaviour {
         if (damage <= 0)
             return;
 
-        HP -= damage;
+        bool anySkip = false;
+
+        foreach(var notifier in registeredNotifiers)
+        {
+            bool res = notifier();
+
+            anySkip |= res;
+        }
+
+        if(!anySkip)
+            HP -= damage;
 
         Debug.Log("I am hit " + HP);
 
@@ -62,5 +82,10 @@ public class Damageable : MonoBehaviour {
     bool alive()
     {
         return HP > 0;
+    }
+
+    public void register(onHitter onhit)
+    {
+        registeredNotifiers.Add(onhit);
     }
 }
