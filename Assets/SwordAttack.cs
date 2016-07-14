@@ -402,6 +402,8 @@ public class SwordAttack : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
+        billboard.SetActive(false);
+
         bool lclick = Input.GetMouseButtonDown(0);
         bool lheld = Input.GetMouseButton(0);
 
