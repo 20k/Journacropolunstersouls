@@ -8,13 +8,29 @@ public class ShieldManager : MonoBehaviour {
     public float transitionTimeSeconds = 0.2f;
     public Damageable toProtect;
 
+    public GameObject onBlockParticles;
+    public GameObject spawnLoc;
+
     float transitionFrac = 0;
 
     bool active = false;
 
     public bool onHit()
     {
-        return active;
+        if (!active)
+            return false;
+
+        GameObject obj = (GameObject)Object.Instantiate(onBlockParticles, spawnLoc.transform.position, spawnLoc.transform.rotation);
+
+        obj.SetActive(false);
+        obj.SetActive(true);
+
+        /*ParticleSystem ps = obj.GetComponent<ParticleSystem>();
+
+        ps.Stop();
+        ps.Simulate(0, true, true);*/
+
+        return true;
     }
 
 	// Use this for initialization
