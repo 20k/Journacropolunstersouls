@@ -523,6 +523,8 @@ public class SwordAttack : MonoBehaviour {
 
         billboard.SetActive(true);
 
+        billboard.GetComponent<Renderer>().material.color = GetChargeCol(a.chargeLevel);
+
         //UpdateBillboard();
     }
 
