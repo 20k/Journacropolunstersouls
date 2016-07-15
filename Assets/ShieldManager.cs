@@ -34,18 +34,11 @@ public class ShieldManager : MonoBehaviour {
             extra = staminaManager.doBlockAndGetDamageResidual(dam);
         }
 
-        //float extra = staminaManager.doBlockAndGetDamageResidual(dam);
-
         GameObject nobj = (GameObject)Object.Instantiate(onBlockParticles, spawnLoc.transform.position, spawnLoc.transform.rotation);
 
         nobj.SetActive(false);
         nobj.SetActive(true);
-
-        /*ParticleSystem ps = obj.GetComponent<ParticleSystem>();
-
-        ps.Stop();
-        ps.Simulate(0, true, true);*/
-
+        
         return extra;
     }
 
