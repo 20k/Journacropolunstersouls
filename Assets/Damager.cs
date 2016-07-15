@@ -5,7 +5,6 @@ public class Damager : MonoBehaviour {
     public string tagCanHit = "Damaging";
     public float amount = 10;
 
-
     Collider col;
     bool hitObject = false;
 

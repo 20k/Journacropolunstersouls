@@ -16,17 +16,30 @@ public class ShieldManager : MonoBehaviour {
 
     bool active = false;
 
-    public float onHit(float dam)
+    public float onHit(float dam, GameObject obj)
     {
         if (!active)
             return dam;
 
-        float extra = staminaManager.doBlockAndGetDamageResidual(dam);
+        WigglesMaster master = obj.GetComponentInParent<WigglesMaster>();
 
-        GameObject obj = (GameObject)Object.Instantiate(onBlockParticles, spawnLoc.transform.position, spawnLoc.transform.rotation);
+        float extra = 0f;
 
-        obj.SetActive(false);
-        obj.SetActive(true);
+        if(master != null)
+        {
+            extra = staminaManager.doDirectStaminaDamage(dam, master.GetStaminaDamage());
+        }
+        else
+        {
+            extra = staminaManager.doBlockAndGetDamageResidual(dam);
+        }
+
+        //float extra = staminaManager.doBlockAndGetDamageResidual(dam);
+
+        GameObject nobj = (GameObject)Object.Instantiate(onBlockParticles, spawnLoc.transform.position, spawnLoc.transform.rotation);
+
+        nobj.SetActive(false);
+        nobj.SetActive(true);
 
         /*ParticleSystem ps = obj.GetComponent<ParticleSystem>();
 

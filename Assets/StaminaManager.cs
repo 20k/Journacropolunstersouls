@@ -96,6 +96,24 @@ public class StaminaManager : MonoBehaviour {
         return true;
     }
 
+    public float doDirectStaminaDamage(float damage, float staminaDamage)
+    {
+        stamina -= staminaDamage;
+
+        if(stamina < 0f)
+        {
+            float predeplete = stamina;           
+
+            checkDepletion();
+
+            return (Mathf.Abs(predeplete) / staminaDamage) * damage;
+        }
+
+        checkDepletion();
+
+        return 0f;
+    }
+
     /// <summary>
     /// returns residual damage
     /// </summary>

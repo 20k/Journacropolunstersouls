@@ -130,6 +130,7 @@ public class WigglesMaster : MonoBehaviour {
         public AnimationCurve damageCurve;
         public float maxDamage = 10;
         public float timeSeconds = 2;
+        public float flatStaminaDamage = 0;
 
         /// <summary>
         /// 0.5 is center, 1 is dist/2, 0 is -dist/2
@@ -151,6 +152,8 @@ public class WigglesMaster : MonoBehaviour {
 
         return moves[0];
     }
+
+    float currentStaminaDamage = 0;
 
     private String currentMove = "BodySlam";
     bool moveIsExecuting = false;
@@ -362,6 +365,16 @@ public class WigglesMaster : MonoBehaviour {
         return (tpos - spos).magnitude;
     }
 
+    void SetStaminaDamage(float damage)
+    {
+        currentStaminaDamage = damage;
+    }
+
+    public float GetStaminaDamage()
+    {
+        return currentStaminaDamage;
+    }
+
     void SetDamage(float damage)
     {
         if (damage > Mathf.Epsilon)
@@ -392,6 +405,11 @@ public class WigglesMaster : MonoBehaviour {
         {
             dam[i].SetActive(true);
         }
+    }
+
+    void UpdateCurrentStaminaDamage()
+    {
+
     }
 
     void SetNoDamage()
@@ -426,8 +444,11 @@ public class WigglesMaster : MonoBehaviour {
 
         float damage = mov.damageCurve.Evaluate(attackFrac) * mov.maxDamage;
 
+        float stamDamage = damage > 0f ? mov.flatStaminaDamage : 0f;
+
         //Debug.Log("afrac then damage " + attackFrac + " " + damage);
 
+        SetStaminaDamage(stamDamage);
         SetDamage(damage);
 
         Vector3 npos = new Vector3(0, 0, mov.distance) * eval;
