@@ -6,7 +6,7 @@ using System.Collections.Generic;
 /// true indicates that the onhit should be terminated
 /// </summary>
 /// <returns></returns>
-public delegate bool onHitter();
+public delegate float onHitter(float dam);
 
 public class Damageable : MonoBehaviour {
 
@@ -62,17 +62,15 @@ public class Damageable : MonoBehaviour {
         if (damage <= 0)
             return;
 
-        bool anySkip = false;
+        float residual = damage;
 
         foreach(var notifier in registeredNotifiers)
         {
-            bool res = notifier();
-
-            anySkip |= res;
+            residual = notifier(residual);
         }
 
-        if(!anySkip)
-            HP -= damage;
+        //if(!anySkip)
+        HP -= residual;
 
         Debug.Log("I am hit " + HP);
 

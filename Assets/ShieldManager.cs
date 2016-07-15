@@ -7,6 +7,7 @@ public class ShieldManager : MonoBehaviour {
     public float defenseRestAngle = 0f;
     public float transitionTimeSeconds = 0.2f;
     public Damageable toProtect;
+    public StaminaManager staminaManager;
 
     public GameObject onBlockParticles;
     public GameObject spawnLoc;
@@ -15,10 +16,12 @@ public class ShieldManager : MonoBehaviour {
 
     bool active = false;
 
-    public bool onHit()
+    public float onHit(float dam)
     {
         if (!active)
-            return false;
+            return dam;
+
+        float extra = staminaManager.doBlockAndGetDamageResidual(dam);
 
         GameObject obj = (GameObject)Object.Instantiate(onBlockParticles, spawnLoc.transform.position, spawnLoc.transform.rotation);
 
@@ -30,7 +33,7 @@ public class ShieldManager : MonoBehaviour {
         ps.Stop();
         ps.Simulate(0, true, true);*/
 
-        return true;
+        return extra;
     }
 
 	// Use this for initialization
@@ -62,5 +65,8 @@ public class ShieldManager : MonoBehaviour {
         rot.y = defenseRestAngle * transitionFrac + -idleRestAngle * (1f - transitionFrac);
 
         transform.localRotation = Quaternion.Euler(rot);
+
+
+        staminaManager.tickBlock(rheld);
     }
 }

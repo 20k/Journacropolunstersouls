@@ -8,6 +8,7 @@ public class StaminaManager : MonoBehaviour {
 
     public float sprintStaminaDrainPS = 5;
     public float dodgeStaminaDrainBulk = 15;
+    public float healthDamageToStaminaDrainFrac = 0.5f;
 
     [HideInInspector]
     public float maxStamina;
@@ -17,6 +18,7 @@ public class StaminaManager : MonoBehaviour {
     public bool shouldRegenStamina = true;
 
     public float dodgeFrac = 1f;
+    public bool isBlocking = false;
 
 	// Use this for initialization
 	void Start () {
@@ -26,7 +28,7 @@ public class StaminaManager : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-        if(shouldRegenStamina && dodgeFrac >= 1f)
+        if(shouldRegenStamina && dodgeFrac >= 1f && !isBlocking)
             stamina += Time.deltaTime * staminaRegenPS;
 
         stamina = Mathf.Min(stamina, maxStamina);
@@ -92,6 +94,35 @@ public class StaminaManager : MonoBehaviour {
         depleteAtRate(sprintStaminaDrainPS);
 
         return true;
+    }
+
+    /// <summary>
+    /// returns residual damage
+    /// </summary>
+    /// <param name="dam"></param>
+    /// <returns></returns>
+    public float doBlockAndGetDamageResidual(float dam)
+    {
+        //if (!canDoStaminaAction())
+        //    return dam;
+
+        float stam = dam * healthDamageToStaminaDrainFrac;
+
+        stamina -= stam;
+
+        float extra = Mathf.Abs(stamina) / healthDamageToStaminaDrainFrac;
+
+        if (stamina >= 0)
+            extra = 0;
+
+        checkDepletion();
+
+        return extra;
+    }
+
+    public void tickBlock(bool blocking)
+    {
+        isBlocking = blocking;
     }
 
     public bool canDoStaminaAction()
