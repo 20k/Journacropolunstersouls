@@ -17,12 +17,15 @@ public class Damageable : MonoBehaviour {
     bool isInvuln = false;
     float invulnFrac = 0;
 
+    [HideInInspector]
+    public float maxHP = 0;
+
 
     List<onHitter> registeredNotifiers = new List<onHitter>();
 
 	// Use this for initialization
 	void Start () {
-
+        maxHP = HP;
 	}
 	
 	// Update is called once per frame
