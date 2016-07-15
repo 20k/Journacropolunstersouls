@@ -25,14 +25,14 @@ namespace JamesCamera.TestOverheadView
             private bool m_Running;
 #endif
 
-            public void UpdateDesiredTargetSpeed(Vector2 input)
+            public void UpdateDesiredTargetSpeed(Vector2 input, StaminaManager staminaManager)
             {
                 if (input == Vector2.zero) return;
 
                 CurrentTargetSpeed = ForwardSpeed;
 
 #if !MOBILE_INPUT
-                if (Input.GetKey(RunKey))
+                if (Input.GetKey(RunKey) && staminaManager.doSprint())
                 {
                     CurrentTargetSpeed *= RunMultiplier;
                     m_Running = true;
@@ -78,6 +78,7 @@ namespace JamesCamera.TestOverheadView
         public float DodgeDistance = 1;
         public float DodgeTimeSeconds = 1;
         public float DodgeTimeRecovery = 1.5f;
+        public StaminaManager staminaManager;
         private float DodgeTime = 0; ///not a frac
         private bool IsDodging = false;
         private Vector3 DodgeStart = new Vector3(0, 0, 0);
@@ -131,6 +132,9 @@ namespace JamesCamera.TestOverheadView
             if (IsDodging)
                 return;
 
+            if (!staminaManager.doDodge())
+                return;
+
             //Vector3 in3 = new Vector3(input.x, 0, input.y);
 
             Vector3 desiredMove = cam.transform.forward * input.y + cam.transform.right * input.x;
@@ -159,6 +163,8 @@ namespace JamesCamera.TestOverheadView
 
             if (DodgeTime >= DodgeTimeSeconds + DodgeTimeRecovery)
                 IsDodging = false;
+
+            staminaManager.tickDodge(DodgeTime / (DodgeTimeSeconds + DodgeTimeRecovery));
         }
 
         private void Update()
@@ -256,7 +262,7 @@ namespace JamesCamera.TestOverheadView
                 x = CrossPlatformInputManager.GetAxisRaw("Horizontal"),
                 y = CrossPlatformInputManager.GetAxisRaw("Vertical")
             };
-            movementSettings.UpdateDesiredTargetSpeed(input);
+            movementSettings.UpdateDesiredTargetSpeed(input, staminaManager);
             return input;
         }
 

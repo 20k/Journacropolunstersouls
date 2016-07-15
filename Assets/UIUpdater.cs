@@ -3,6 +3,7 @@ using System.Collections;
 
 public class UIUpdater : MonoBehaviour {
     public Damageable HPToDisplay;
+    public StaminaManager staminaManager;
 
     GameObject staminaBack, staminaGray, stamina;
     GameObject healthBack, healthGray, health;
@@ -66,7 +67,7 @@ public class UIUpdater : MonoBehaviour {
     // Update is called once per frame
     void Update () {
         SetHP(HPToDisplay.HP, HPToDisplay.maxHP, 2);
-        SetStamina(HPToDisplay.maxHP * (2/3f), HPToDisplay.maxHP * (2/3f), 2);
+        SetStamina(staminaManager.stamina,staminaManager.maxStamina, 2);
 
     }
 }
