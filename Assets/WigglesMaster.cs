@@ -258,7 +258,7 @@ public class WigglesMaster : MonoBehaviour {
     /// <summary>
     /// How do I terminate this
     /// </summary>
-    void FootStomp()
+    /*void FootStomp()
     {
         if(currentWaitSlots.OnceOnly())
         {
@@ -279,8 +279,8 @@ public class WigglesMaster : MonoBehaviour {
                 {
                     lnum++;
 
-                    //if (lnum != 4)
-                    //    continue;
+                    if (lnum != 4)
+                        continue;
 
                     ProceduralLeg leg = child.gameObject.GetComponent<ProceduralLeg>();
 
@@ -292,12 +292,13 @@ public class WigglesMaster : MonoBehaviour {
 
                     leg.legHub.legShiftOffsetFrac = 0.9f;
 
+                    leg.walkHeight = 5;
                 }
             }
 
             InitiateAttack("FootStomp");
         }
-    }
+    }*/
 
         //we need a history of attacks to complete the AI puzzle
     void TickAI()
@@ -333,7 +334,7 @@ public class WigglesMaster : MonoBehaviour {
             else
                 currentMoveFunc = FaceAndBodyslam;
 
-            currentMoveFunc = FootStomp;
+            //currentMoveFunc = FootStomp;
         }
     }
 
