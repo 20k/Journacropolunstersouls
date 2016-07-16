@@ -271,17 +271,27 @@ public class WigglesMaster : MonoBehaviour {
         {
             currentWaitSlots.ActivateWaitSlot(waitSlotType.attackFinished);
 
+            int lnum = 0;
+
             foreach(Transform child in transform)
             {
                 if(child.tag == "Leg")
                 {
-                    GameObject obj = child.gameObject;
+                    lnum++;
 
-                    ProceduralLeg leg = obj.GetComponent<ProceduralLeg>();
+                    //if (lnum != 4)
+                    //    continue;
+
+                    ProceduralLeg leg = child.gameObject.GetComponent<ProceduralLeg>();
 
                     Vector3 randomVec = leg.getRandomFootPosition();
 
                     leg.setFootPlantTipTransition(randomVec);
+
+                    leg.overrideLegShiftTimeFrame(1);
+
+                    leg.legHub.legShiftOffsetFrac = 0.9f;
+
                 }
             }
 

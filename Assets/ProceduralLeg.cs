@@ -53,7 +53,8 @@ public class ProceduralLeg : MonoBehaviour {
     Vector3 lowerBaseOffset;
     Vector3 currentIdealFootRestPosition;
 
-    float legShiftTimeSeconds;
+    [HideInInspector]
+    public float legShiftTimeSeconds;
 
     [HideInInspector]
     public float maxRestDistance;
@@ -62,6 +63,8 @@ public class ProceduralLeg : MonoBehaviour {
     /// for debugging
     /// </summary>
     private int whoAmI = -1;
+
+    bool overriddenLegTimeThisFrame = false;
 
     /// <summary>
     /// This is true if the leg in front of us has just moved
@@ -476,6 +479,23 @@ public class ProceduralLeg : MonoBehaviour {
         isPlanted = false;
     }
 
+    public void overrideLegShiftTimeFrame(float time)
+    {
+        legShiftTimeSeconds = time;
+
+        overriddenLegTimeThisFrame = true;
+    }
+
+    float pauseFrac = 1f;
+    float pauseDuration = 1f;
+
+    public void pause(float time)
+    {
+        pauseFrac = 0f;
+        pauseDuration = time;
+    }
+
+
     /// <summary>
     /// last two parameters only useful for ye olde style sinwalk
     /// </summary>
@@ -485,7 +505,11 @@ public class ProceduralLeg : MonoBehaviour {
     public void Tick (float ftime, float direction, float mult) {
 
         currentIdealFootRestPosition = getRestFootPlant();
-        legShiftTimeSeconds = legHub.legShiftTimeSeconds;
+
+        if(!overriddenLegTimeThisFrame)
+            legShiftTimeSeconds = legHub.legShiftTimeSeconds;
+
+        overriddenLegTimeThisFrame = false;
 
         if (isPlanted)
         {
@@ -501,7 +525,10 @@ public class ProceduralLeg : MonoBehaviour {
             if (!isFirmlyPlanted && ShouldMovePlanted())
                 requestFootTransition();
 
-            tickFootTransition(ftime);
+            if(pauseFrac >= 1f)
+                tickFootTransition(ftime);
+
+            pauseFrac += Time.deltaTime / pauseDuration;
 
             return;
         }
@@ -532,5 +559,6 @@ public class ProceduralLeg : MonoBehaviour {
             walkCycleFrac += mult * direction * ftime / walkCycleSeconds;
 
         walkCycleFrac %= 1f;
+
 	}
 }
