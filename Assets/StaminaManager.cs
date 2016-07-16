@@ -13,12 +13,17 @@ public class StaminaManager : MonoBehaviour {
     [HideInInspector]
     public float maxStamina;
 
+    [HideInInspector]
     public bool forcedExhaustionRegen = false;
     public bool forcedDodgeRegen = false;
     public bool shouldRegenStamina = true;
 
+    [HideInInspector]
     public float dodgeFrac = 1f;
+    [HideInInspector]
     public bool isBlocking = false;
+
+    bool isPaused = false;
 
 	// Use this for initialization
 	void Start () {
@@ -28,7 +33,7 @@ public class StaminaManager : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-        if(shouldRegenStamina && dodgeFrac >= 1f && !isBlocking)
+        if(shouldRegenStamina && dodgeFrac >= 1f && !isBlocking && !isPaused)
             stamina += Time.deltaTime * staminaRegenPS;
 
         stamina = Mathf.Min(stamina, maxStamina);
@@ -36,6 +41,8 @@ public class StaminaManager : MonoBehaviour {
         checkDepletion();
 
         shouldRegenStamina = true;
+
+        isPaused = false;
 	}
 
     void checkDepletion()
@@ -46,7 +53,7 @@ public class StaminaManager : MonoBehaviour {
             stamina = 0;
         }
 
-        if (forcedExhaustionRegen && stamina >= staminaRegenPS * mandatoryStaminaRechargeTime)
+        if (forcedExhaustionRegen && stamina >= Mathf.Min(staminaRegenPS * mandatoryStaminaRechargeTime, maxStamina))
         {
             forcedExhaustionRegen = false;
         }
@@ -146,5 +153,10 @@ public class StaminaManager : MonoBehaviour {
     public bool canDoStaminaAction()
     {
         return !forcedExhaustionRegen;
+    }
+
+    public void pause()
+    {
+        isPaused = true;
     }
 }

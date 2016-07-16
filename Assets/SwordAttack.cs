@@ -170,6 +170,7 @@ public class attack
     public List<movement> moveList;
     public bool loops = false;
     public float extraDamagePerChargeLevel = 10;
+    public float staminaDrain = 0f;
 
     [HideInInspector]
     public int numPopped = 0;
@@ -336,6 +337,8 @@ public class SwordAttack : MonoBehaviour {
     public MainCharacterProceduralLegController legController;
     public Camera cam;
 
+    public StaminaManager staminaManager;
+
     public attack slashAttack;
     public attack MH1;
     /// <summary>
@@ -411,11 +414,16 @@ public class SwordAttack : MonoBehaviour {
 
         if (attackList.Count == 0 && lclick)
         {
-            attack atk = new attack(MH1);
+            if(staminaManager.canDoStaminaAction())
+            {
+                attack atk = new attack(MH1);
 
-            attackList.Add(atk);
+                attackList.Add(atk);
 
-            damage.ResetHit();
+                damage.ResetHit();
+
+                staminaManager.depleteBulk(atk.staminaDrain);
+            }
         }
 
         if(attackList.Count == 0)
@@ -438,6 +446,8 @@ public class SwordAttack : MonoBehaviour {
                 attackList.RemoveAt(i);
                 i--;
             }
+
+            staminaManager.pause();
         }
 
         activateColliderIfDamaging();
