@@ -184,6 +184,9 @@ public class attack
         moveList = new List<movement>();
         loops = a.loops;
         extraDamagePerChargeLevel = a.extraDamagePerChargeLevel;
+        movementMult = a.movementMult;
+        turnMult = a.turnMult;
+        staminaDrain = a.staminaDrain;
 
         for (int i = 0; i < a.moveList.Count; i++)
         {
