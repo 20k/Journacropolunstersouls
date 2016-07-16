@@ -36,6 +36,8 @@ public class ShieldManager : MonoBehaviour {
 
         GameObject nobj = (GameObject)Object.Instantiate(onBlockParticles, spawnLoc.transform.position, spawnLoc.transform.rotation);
 
+        nobj.transform.parent = gameObject.transform;
+
         nobj.SetActive(false);
         nobj.SetActive(true);
         

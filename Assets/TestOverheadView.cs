@@ -176,7 +176,7 @@ namespace JamesCamera.TestOverheadView
 
             GroundCheck();
             //Vector2 input = GetInput();
-            input = GetInput() * Time.deltaTime / Time.fixedDeltaTime;
+            input = GetInput() * Time.deltaTime / 0.02f;
 
             float runval = movementSettings.Running ? 1f : 0f;
 
@@ -188,7 +188,7 @@ namespace JamesCamera.TestOverheadView
                 Vector3 desiredMove = cam.transform.forward * input.y + cam.transform.right * input.x;
                 desiredMove = Vector3.ProjectOnPlane(desiredMove, m_GroundContactNormal).normalized;
 
-                transform.position = transform.position + desiredMove.normalized * movementSettings.CurrentTargetSpeed * Time.deltaTime / Time.fixedDeltaTime;
+                transform.position = transform.position + desiredMove.normalized * movementSettings.CurrentTargetSpeed * Time.deltaTime / 0.02f;
                 m_RigidBody.position = transform.position;
             }
 

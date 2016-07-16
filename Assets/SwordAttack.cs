@@ -374,6 +374,8 @@ public class SwordAttack : MonoBehaviour {
             ///should find out how to throw c# exceptions and throw one
         }
 
+        swordTransform.localRotation = Quaternion.LookRotation(MH1.moveList[0].startVec);
+
         /*if(emit == null)
         {
             Debug.Log("no emitter, likely crash");
