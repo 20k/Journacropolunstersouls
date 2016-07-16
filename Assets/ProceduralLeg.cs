@@ -324,7 +324,7 @@ public class ProceduralLeg : MonoBehaviour {
 
         Vector3 nvec = new Vector3(x, 0, y);
 
-        return nvec;
+        return nvec + rest;
     }
 
 

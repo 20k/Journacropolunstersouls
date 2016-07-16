@@ -284,6 +284,8 @@ public class WigglesMaster : MonoBehaviour {
                     leg.setFootPlantTipTransition(randomVec);
                 }
             }
+
+            InitiateAttack("FootStomp");
         }
     }
 
@@ -321,7 +323,7 @@ public class WigglesMaster : MonoBehaviour {
             else
                 currentMoveFunc = FaceAndBodyslam;
 
-            //currentMoveFunc = FootStomp;
+            currentMoveFunc = FootStomp;
         }
     }
 
@@ -439,6 +441,11 @@ public class WigglesMaster : MonoBehaviour {
             return;
 
         MonsterMove mov = GetMove(currentMove);
+
+        if(mov == null)
+        {
+            Debug.Log("Attack not found, fatal error");
+        }
 
         float eval = - ((mov.curve.Evaluate(attackFrac) - 0.5f) * 2);
 
