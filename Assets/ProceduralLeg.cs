@@ -50,6 +50,8 @@ public class ProceduralLeg : MonoBehaviour {
 
     Quaternion lowerLegBaseRotation;
 
+
+
     Vector3 lowerBaseOffset;
     Vector3 currentIdealFootRestPosition;
 
@@ -58,6 +60,8 @@ public class ProceduralLeg : MonoBehaviour {
 
     [HideInInspector]
     public float maxRestDistance;
+
+    public float defaultDistLengthFromSpiderBody = 0;
 
     /// <summary>
     /// for debugging
@@ -104,6 +108,7 @@ public class ProceduralLeg : MonoBehaviour {
         sphere1 = GameObject.Find("DebugSphere1");
 
         maxRestDistance = lowerBaseOffset.magnitude * moveDistanceMult;
+        defaultDistLengthFromSpiderBody = lowerBaseOffset.magnitude;
 
         lowerLength = Mathf.Max(lowerLeg.localScale.x, Mathf.Max(lowerLeg.localScale.y, lowerLeg.localScale.z));
         upperLength = Mathf.Max(upperLeg.localScale.x, Mathf.Max(upperLeg.localScale.y, upperLeg.localScale.z));

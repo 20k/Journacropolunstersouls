@@ -127,6 +127,7 @@ public class WigglesMaster : MonoBehaviour {
     {
         public String name;
         public AnimationCurve curve;
+        public AnimationCurve xCurve;
         public AnimationCurve damageCurve;
         public float maxDamage = 10;
         public float timeSeconds = 2;
@@ -184,6 +185,9 @@ public class WigglesMaster : MonoBehaviour {
 
     }
 
+    /// <summary>
+    /// I NEED to include head distance
+    /// </summary>
     void FaceAndBodyslam()
     {
         ///plant all feet, and once only
@@ -215,6 +219,56 @@ public class WigglesMaster : MonoBehaviour {
             currentWaitSlots.ActivateWaitSlot(waitSlotType.attackFinished);
             InitiateAttack("BodySlam");
         }
+    }
+
+    /// <summary>
+    /// -1 -> left, 1 -> right
+    /// </summary>
+    /// <param name="side"></param>
+    void SideSwipe(int side)
+    {
+        if (currentWaitSlots.OnceOnly())
+        {
+            PlantAllFeet();
+        }
+
+        ///all this skip
+        ///If the angle to target less than const, skip the turn
+        /*float angleToTarget = Mathf.Abs(AngleToTarget(target));
+
+        bool skipTurn = angleToTarget < Mathf.Rad2Deg * Mathf.PI / 8f;
+
+        if (skipTurn && !currentWaitSlots.EverRequested(waitSlotType.turnFinished))
+        {
+            currentWaitSlots.ActivateWaitSlot(waitSlotType.turnFinished);
+            currentWaitSlots.TerminateWaitSlot(waitSlotType.turnFinished);
+        }
+
+        if (currentWaitSlots.CanGoAhead(waitSlotType.turnFinished))
+        {
+            currentWaitSlots.ActivateWaitSlot(waitSlotType.turnFinished);
+            ExecuteTurn(AngleToTarget(target));
+        }*/
+
+        if (currentWaitSlots.CanGoAhead(waitSlotType.attackFinished))
+        {
+            currentWaitSlots.ActivateWaitSlot(waitSlotType.attackFinished);
+
+            if (side == -1)
+                InitiateAttack("SideSwipeL");
+            else
+                InitiateAttack("SideSwipeR");
+        }
+    }
+
+    void LSwipe()
+    {
+        SideSwipe(-1);
+    }
+
+    void RSwipe()
+    {
+        SideSwipe(1);
     }
 
     void Scuttle()
@@ -333,6 +387,38 @@ public class WigglesMaster : MonoBehaviour {
                 currentMoveFunc = Scuttle;
             else
                 currentMoveFunc = FaceAndBodyslam;
+
+            ///assume l and r distance are the same
+            float sideSwipeDistance = GetMove("SideSwipeL").distance;
+
+            float restLegDistance = legHub.GetLegs()[0].defaultDistLengthFromSpiderBody;
+
+            //Vector3 spiderForward = new Vector3(0, 0, -1);
+
+            Vector3 spiderRight = body.transform.rotation * new Vector3(-1, 0, 0);
+
+            float cos_angle = Vector3.Dot(spiderRight, (target.position - body.position).normalized);
+
+            float angle = Mathf.Acos(cos_angle) * Mathf.Rad2Deg;
+
+            float bound_angle = 90;
+
+            //float cos_45 = Mathf.Cos(45/2f);
+            //float cos_1575 = Mathf.Cos(180 - (45 / 2f));
+
+            if(angle <= bound_angle / 2f && DistanceToTarget(target) < sideSwipeDistance + restLegDistance)
+            {
+                currentMoveFunc = RSwipe;
+            }
+
+            if(angle >= (180 - (bound_angle / 2f)) && DistanceToTarget(target) < sideSwipeDistance + restLegDistance)
+            {
+                currentMoveFunc = LSwipe;
+            }
+
+            Debug.Log(angle + " " + (sideSwipeDistance + restLegDistance));
+
+            //SideSwipe(1);
 
             //currentMoveFunc = FootStomp;
         }
@@ -459,6 +545,7 @@ public class WigglesMaster : MonoBehaviour {
         }
 
         float eval = - ((mov.curve.Evaluate(attackFrac) - 0.5f) * 2);
+        float xEval = - ((mov.xCurve.Evaluate(attackFrac) - 0.5f) * 2);
 
         float damage = mov.damageCurve.Evaluate(attackFrac) * mov.maxDamage;
 
@@ -469,7 +556,7 @@ public class WigglesMaster : MonoBehaviour {
         SetStaminaDamage(stamDamage);
         SetDamage(damage);
 
-        Vector3 npos = new Vector3(0, 0, mov.distance) * eval;
+        Vector3 npos = new Vector3(mov.distance * xEval, 0, mov.distance * eval);
 
         Vector3 globalDiff = wiggles.rotation * npos;
 
