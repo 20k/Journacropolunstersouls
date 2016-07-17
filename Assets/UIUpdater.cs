@@ -92,7 +92,7 @@ public class UIUpdater : MonoBehaviour {
         RectTransform r1 = healthBack.GetComponent<RectTransform>();
         RectTransform r2 = healthGray.GetComponent<RectTransform>();
         RectTransform r3 = health.GetComponent<RectTransform>();
-        RectTransform r4 = tempColour[0].GetComponent<RectTransform>();
+        //RectTransform r4 = tempColour[0].GetComponent<RectTransform>();
 
         float CurSize = cur;
         float MaxSize = max;
@@ -109,7 +109,7 @@ public class UIUpdater : MonoBehaviour {
         RectTransform r1 = staminaBack.GetComponent<RectTransform>();
         RectTransform r2 = staminaGray.GetComponent<RectTransform>();
         RectTransform r3 = stamina.GetComponent<RectTransform>();
-        RectTransform r4 = tempColour[1].GetComponent<RectTransform>();
+        //RectTransform r4 = tempColour[1].GetComponent<RectTransform>();
 
         float CurSize = cur;
         float MaxSize = max;
@@ -121,6 +121,10 @@ public class UIUpdater : MonoBehaviour {
         //r4.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, CurSize);
     }
 
+    /// <summary>
+    /// so much duplicated code
+    /// when we add the magic system in, definitely fix all this
+    /// </summary>
     // Update is called once per frame
     void Update () {
         SetHP(HPToDisplay.HP, HPToDisplay.maxHP, 2);
@@ -133,14 +137,14 @@ public class UIUpdater : MonoBehaviour {
         {
             healthHoldFrac = 0f;
 
-            holdHP = lastHP;
+            holdHP = Mathf.Max(lastHP, holdHP);
         }
 
         if(staminaDiff > activateDiff)
         {
             staminaHoldFrac = 0f;
 
-            holdStamina = lastStamina;
+            holdStamina = Mathf.Max(lastStamina, holdStamina);
         }
 
         if(healthHoldFrac >= 1f && Mathf.Abs(holdHP - HPToDisplay.HP) > Mathf.Epsilon)
@@ -148,9 +152,12 @@ public class UIUpdater : MonoBehaviour {
             float cdiff = (HPToDisplay.HP - holdHP);
 
             if (cdiff > 0)
+            {
                 holdHP = HPToDisplay.HP;
+                cdiff = 0;
+            }
 
-            if(cdiff < -tempColourLossRatePS * Time.deltaTime)
+            if (cdiff < -tempColourLossRatePS * Time.deltaTime)
             {
                 cdiff = -tempColourLossRatePS * Time.deltaTime;
             }
@@ -167,7 +174,10 @@ public class UIUpdater : MonoBehaviour {
             float cdiff = (staminaManager.stamina - holdStamina);
 
             if (cdiff > 0)
+            {
                 holdStamina = staminaManager.stamina;
+                cdiff = 0;
+            }
 
             if (cdiff < -tempColourLossRatePS * Time.deltaTime)
             {
