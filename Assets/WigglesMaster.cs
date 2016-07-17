@@ -108,6 +108,7 @@ public class WaitSlots
 
 public class WigglesMaster : MonoBehaviour {
 
+    public Transform head;
     public Transform wiggles;
     public float spiderSpeed = 1.0f;
     public float turnTimeSeconds = 0.5f;
@@ -288,7 +289,7 @@ public class WigglesMaster : MonoBehaviour {
 
             float distanceToTarget = DistanceToTarget(target);
 
-            GetMove("Scuttle").distance = distanceToTarget - GetSpiderLength()/2f;
+            GetMove("Scuttle").distance = distanceToTarget - GetSpiderBodyLength()/2f;
 
             ExecuteTurn(AngleToTarget(target));
 
@@ -383,7 +384,7 @@ public class WigglesMaster : MonoBehaviour {
         {
             currentWaitSlots.Reset();
 
-            if (DistanceToTarget(target) > GetMove("BodySlam").distance + GetSpiderLength()/2)
+            if (DistanceToTarget(target) > GetMove("BodySlam").distance + GetSpiderBodyLength()/2 + GetSpiderHeadLength())
                 currentMoveFunc = Scuttle;
             else
                 currentMoveFunc = FaceAndBodyslam;
@@ -776,9 +777,15 @@ public class WigglesMaster : MonoBehaviour {
         legs.Add(leg);
     }
 
-    float GetSpiderLength()
+    float GetSpiderBodyLength()
     {
         ///+ head.scale.x, that's whats incorrect
         return body.transform.localScale.z;
     }
+
+    float GetSpiderHeadLength()
+    {
+        return head.transform.localScale.z;
+    }
+
 }
