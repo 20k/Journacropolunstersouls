@@ -417,9 +417,7 @@ public class WigglesMaster : MonoBehaviour {
                 currentMoveFunc = LSwipe;
             }
 
-            Debug.Log(angle + " " + (sideSwipeDistance + restLegDistance));
-
-            //SideSwipe(1);
+            //Debug.Log(angle + " " + (sideSwipeDistance + restLegDistance));
 
             //currentMoveFunc = FootStomp;
         }
