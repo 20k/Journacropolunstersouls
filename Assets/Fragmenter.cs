@@ -19,7 +19,7 @@ public class Fragmenter : MonoBehaviour {
 	void Update () {
 	    if(Input.GetKeyDown(KeyCode.F2))
         {
-            Fragment(mesh);
+           FragmentNonDelaunay(mesh);
         }
 	}
 
@@ -418,7 +418,7 @@ public class Fragmenter : MonoBehaviour {
         min.Scale(transform.localScale);
         max.Scale(transform.localScale);
 
-        int fragmentsPerLayer = 5;
+        int fragmentsPerLayer = 8;
 
         List<List<Vector3>> yFragments = new List<List<Vector3>>();
 
@@ -468,7 +468,15 @@ public class Fragmenter : MonoBehaviour {
                 omesh.RecalculateBounds();
                 omesh.RecalculateNormals();
 
-                //Debug.Log(omesh.vertices[0] + " " + omesh.vertices[1] + " " + omesh.vertices[2]);
+                /*BoxCollider c = obj.GetComponent<BoxCollider>();
+
+                c.enabled = false;
+
+                MeshCollider mcollider = obj.AddComponent<MeshCollider>();
+
+                mcollider.convex = true;
+
+                obj.AddComponent<Rigidbody>();*/
 
                 obj.SetActive(true);
             }
@@ -601,6 +609,6 @@ public class Fragmenter : MonoBehaviour {
             }
         }*/
 
-    gameObject.SetActive(false);
+        gameObject.SetActive(false);
     }
 }
