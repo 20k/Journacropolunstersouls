@@ -489,11 +489,11 @@ public class Fragmenter : MonoBehaviour {
     {
         Bounds bound = mesh.bounds;
 
-        Vector3 nums = new Vector3(10, 20, 10);
+        Vector3 nums = new Vector3(8, 6, 8);
 
-        float fragmentWidth = 0.5f;
-        float fragmentHeight = 0.8f;
-        float fragmentDepth = 0.5f;
+        //float fragmentWidth = 0.5f;
+        //float fragmentHeight = 0.8f;
+        //float fragmentDepth = 0.5f;
 
         Vector3 min = bound.min;
         Vector3 max = bound.max;
@@ -501,26 +501,23 @@ public class Fragmenter : MonoBehaviour {
         ///ffs unity, lacking basic vector features
         //Vector3 step = (max - min) / nums;
 
-        Vector3 step = new Vector3();
-
-        step.x = (max.x - min.x) / nums.x;
-        step.y = (max.y - min.y) / nums.y;
-        step.z = (max.z - min.z) / nums.z;
-
-        //Vector3 widths = new Vector3();
-
-
 
         ///Maybe one day i'll understand why this isn't the * operator
         ///and also why its called scale
         min.Scale(transform.localScale);
         max.Scale(transform.localScale);
 
-        for (float y = min.y; y < max.y; y += fragmentHeight)
+        Vector3 step = new Vector3();
+
+        step.x = Mathf.Abs(max.x - min.x) / nums.x;
+        step.y = Mathf.Abs(max.y - min.y) / nums.y;
+        step.z = Mathf.Abs(max.z - min.z) / nums.z;
+
+        for (float y = min.y; y < max.y; y += step.y)
         {
-            for (float z = min.z; z < max.z; z += fragmentDepth)
+            for (float z = min.z; z < max.z; z += step.z)
             {
-                for (float x = min.x; x < max.x; x += fragmentWidth)
+                for (float x = min.x; x < max.x; x += step.x)
                 {
                     Vector3 point = new Vector3(x, y, z);
 
@@ -529,8 +526,8 @@ public class Fragmenter : MonoBehaviour {
                     {
                         GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
 
-                        obj.transform.position = point + transform.position;
-                        obj.transform.localScale = new Vector3(fragmentWidth, fragmentHeight, fragmentDepth);
+                        obj.transform.position = point + transform.position + step/2f;
+                        obj.transform.localScale = step * 0.99f;
 
                         obj.AddComponent<Rigidbody>();
                         obj.AddComponent<BoxCollider>();
