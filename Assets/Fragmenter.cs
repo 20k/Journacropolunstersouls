@@ -489,6 +489,64 @@ public class Fragmenter : MonoBehaviour {
     {
         Bounds bound = mesh.bounds;
 
+        Vector3 nums = new Vector3(10, 20, 10);
+
+        float fragmentWidth = 0.5f;
+        float fragmentHeight = 0.8f;
+        float fragmentDepth = 0.5f;
+
+        Vector3 min = bound.min;
+        Vector3 max = bound.max;
+
+        ///ffs unity, lacking basic vector features
+        //Vector3 step = (max - min) / nums;
+
+        Vector3 step = new Vector3();
+
+        step.x = (max.x - min.x) / nums.x;
+        step.y = (max.y - min.y) / nums.y;
+        step.z = (max.z - min.z) / nums.z;
+
+        //Vector3 widths = new Vector3();
+
+
+
+        ///Maybe one day i'll understand why this isn't the * operator
+        ///and also why its called scale
+        min.Scale(transform.localScale);
+        max.Scale(transform.localScale);
+
+        for (float y = min.y; y < max.y; y += fragmentHeight)
+        {
+            for (float z = min.z; z < max.z; z += fragmentDepth)
+            {
+                for (float x = min.x; x < max.x; x += fragmentWidth)
+                {
+                    Vector3 point = new Vector3(x, y, z);
+
+                    ///SIGH, THANKS UNITY
+                    if (Physics.CheckSphere(point + gameObject.transform.position, 0.001f))
+                    {
+                        GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+
+                        obj.transform.position = point + transform.position;
+                        obj.transform.localScale = new Vector3(fragmentWidth, fragmentHeight, fragmentDepth);
+
+                        obj.AddComponent<Rigidbody>();
+                        obj.AddComponent<BoxCollider>();
+                    }
+                }
+            }
+        }
+        
+        gameObject.SetActive(false);
+    }
+
+
+    void FragmentNonDelaunayOld(Mesh m)
+    {
+        Bounds bound = mesh.bounds;
+
         float fragmentWidth = 0.4f;
         float fragmentHeight = 0.8f;
         float fragmentDepth = 0.4f;
@@ -505,11 +563,11 @@ public class Fragmenter : MonoBehaviour {
 
         bool iAmWithin = false;
 
-        for(float y = min.y; y <= max.y; y += fragmentHeight)
+        for (float y = min.y; y <= max.y; y += fragmentHeight)
         {
-            for(float z = min.z; z <= max.z; z += fragmentDepth)
+            for (float z = min.z; z <= max.z; z += fragmentDepth)
             {
-                for(float x = min.x; x <= max.x; x += fragmentWidth)
+                for (float x = min.x; x <= max.x; x += fragmentWidth)
                 {
                     Vector3 point = new Vector3(x, y, z);
 
@@ -518,7 +576,7 @@ public class Fragmenter : MonoBehaviour {
                     {
                         bool boundary = false;
 
-                        if(!iAmWithin)
+                        if (!iAmWithin)
                         {
                             boundary = true;
                         }
@@ -534,7 +592,7 @@ public class Fragmenter : MonoBehaviour {
                     else
                     {
                         ///the last particle was not inside!!!!
-                        if(iAmWithin)
+                        if (iAmWithin)
                         {
                             fragments[fragments.Count - 1].boundary = true;
                         }
@@ -553,14 +611,17 @@ public class Fragmenter : MonoBehaviour {
 
         float currentY = float.MaxValue;
 
-        for(int i=0; i<fragments.Count; i++)
+        Vector3 globalPos = transform.position;
+
+
+        for (int i = 0; i < fragments.Count; i++)
         {
             //if(!fragments[i].boundary)
             {
                 GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
 
-                obj.transform.position = fragments[i].pos + gameObject.transform.position;
-                obj.transform.localScale = new Vector3(fragmentWidth, fragmentHeight, fragmentDepth);
+                obj.transform.position = fragments[i].pos + globalPos;
+                obj.transform.localScale = new Vector3(fragmentWidth, fragmentHeight, fragmentDepth) * 0.98f;
 
                 obj.AddComponent<Rigidbody>();
                 obj.AddComponent<BoxCollider>();
@@ -571,7 +632,7 @@ public class Fragmenter : MonoBehaviour {
                 boundPoints.Add(fragments[i]);
             }
 
-            if(currentY != fragments[i].pos.y && fragments[i].boundary)
+            if (currentY != fragments[i].pos.y && fragments[i].boundary)
             {
                 yLayeredBounds.Add(new List<fragment>());
                 cy++;
@@ -579,14 +640,14 @@ public class Fragmenter : MonoBehaviour {
             }
 
             ///so basically we end up with x/z pounds, with y structure
-            if(fragments[i].boundary)
+            if (fragments[i].boundary)
             {
                 yLayeredBounds[cy].Add(fragments[i]);
             }
         }
 
         ///objListOrder.Sort((x, y) => x.OrderDate.CompareTo(y.OrderDate));
-        
+
 
         /*for(int l = 0; l < yLayeredBounds.Count; l++)
         {
