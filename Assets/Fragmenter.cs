@@ -516,8 +516,8 @@ public class Fragmenter : MonoBehaviour {
 
         ///Maybe one day i'll understand why this isn't the * operator
         ///and also why its called scale
-        min.Scale(transform.localScale);
-        max.Scale(transform.localScale);
+        min.Scale(transform.lossyScale);
+        max.Scale(transform.lossyScale);
 
         Vector3 step = new Vector3();
 
