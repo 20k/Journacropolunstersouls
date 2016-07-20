@@ -189,8 +189,19 @@ namespace JamesCamera.TestOverheadView
                 Vector3 desiredMove = cam.transform.forward * input.y + cam.transform.right * input.x;
                 desiredMove = Vector3.ProjectOnPlane(desiredMove, m_GroundContactNormal).normalized;
 
-                transform.position = transform.position + desiredMove.normalized * movementSettings.CurrentTargetSpeed * Time.deltaTime / 0.02f;
-                m_RigidBody.position = transform.position;
+                /*desiredMove = desiredMove * movementSettings.CurrentTargetSpeed / 0.02f;// * Time.deltaTime / 0.02f;
+
+                float yvel = m_RigidBody.velocity.y;
+
+                desiredMove.y += yvel;
+
+                m_RigidBody.velocity = desiredMove;*/
+
+                //transform.position = transform.position + desiredMove.normalized * movementSettings.CurrentTargetSpeed * Time.deltaTime / 0.02f;
+                //m_RigidBody.position = transform.position;
+
+                m_RigidBody.position += desiredMove.normalized * movementSettings.CurrentTargetSpeed * Time.deltaTime / 0.02f;
+                transform.position = m_RigidBody.position;
             }
 
             if (m_IsGrounded)
@@ -250,7 +261,7 @@ namespace JamesCamera.TestOverheadView
             {
                 if (Mathf.Abs(Vector3.Angle(hitInfo.normal, Vector3.up)) < 85f)
                 {
-                    m_RigidBody.velocity = Vector3.ProjectOnPlane(m_RigidBody.velocity, hitInfo.normal);
+                    //m_RigidBody.velocity = Vector3.ProjectOnPlane(m_RigidBody.velocity, hitInfo.normal);
                 }
             }
         }
@@ -319,6 +330,7 @@ namespace JamesCamera.TestOverheadView
                 {
                     whichNotMe = hits[i];
                     found = true;
+                    break;
                 }
             }
 
