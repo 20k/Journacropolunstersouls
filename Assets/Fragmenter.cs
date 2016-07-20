@@ -489,7 +489,7 @@ public class Fragmenter : MonoBehaviour {
     {
         Bounds bound = mesh.bounds;
 
-        Vector3 nums = new Vector3(8, 6, 8);
+        Vector3 nums = new Vector3(4, 3, 4);
 
         //float fragmentWidth = 0.5f;
         //float fragmentHeight = 0.8f;
@@ -521,16 +521,36 @@ public class Fragmenter : MonoBehaviour {
                 {
                     Vector3 point = new Vector3(x, y, z);
 
+                    Collider[] found = Physics.OverlapSphere(point + gameObject.transform.position, 0.0001f);
+
+                    bool foundMine = false;
+
+                    for(int i=0; i<found.Length; i++)
+                    {
+                        if(found[i] == col)
+                        {
+                            foundMine = true;
+                            break;
+                        }
+                    }
+
+                    if (!foundMine)
+                        continue;
+
                     ///SIGH, THANKS UNITY
-                    if (Physics.CheckSphere(point + gameObject.transform.position, 0.001f))
+                    //if (Physics.CheckSphere())
                     {
                         GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
 
                         obj.transform.position = point + transform.position + step/2f;
                         obj.transform.localScale = step * 0.99f;
 
-                        obj.AddComponent<Rigidbody>();
+                        Rigidbody body = obj.AddComponent<Rigidbody>();
+
                         obj.AddComponent<BoxCollider>();
+
+                        //body.AddExplosionForce(10f, transform.position, 10 * (max - min).magnitude / 2f);
+                        body.AddExplosionForce(100f, transform.position, 100f);
                     }
                 }
             }
