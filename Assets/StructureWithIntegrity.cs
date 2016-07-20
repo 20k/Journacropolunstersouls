@@ -4,6 +4,9 @@ using System.Collections;
 public class StructureWithIntegrity : MonoBehaviour {
 
     public float fracDestroyedToCollapse = 0.5f;
+    public float timeBetweenSegmentCollapse = 1f;
+
+    float timeSinceLastCollapse = 0;
 
 	// Use this for initialization
 	void Start () {
@@ -12,7 +15,8 @@ public class StructureWithIntegrity : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-	
+
+        timeSinceLastCollapse += Time.deltaTime;
 	}
 
     public bool isStructurallySound()
@@ -35,5 +39,17 @@ public class StructureWithIntegrity : MonoBehaviour {
             return false;
 
         return true;
+    }
+
+    public bool requestCollapse()
+    {
+        if(timeSinceLastCollapse >= timeBetweenSegmentCollapse)
+        {
+            timeSinceLastCollapse = 0;
+
+            return true;
+        }
+
+        return false;
     }
 }

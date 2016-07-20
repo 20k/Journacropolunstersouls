@@ -27,7 +27,7 @@ public class Fragmenter : MonoBehaviour {
 
         if(structure != null)
         {
-            if(!structure.isStructurallySound())
+            if(!structure.isStructurallySound() && structure.requestCollapse())
             {
                 FragmentNonDelaunay(mesh);
             }
@@ -38,7 +38,7 @@ public class Fragmenter : MonoBehaviour {
     {
         GameObject obj = col.gameObject;
 
-        // BuildingDestroyer dest = obj.GetComponentInParent<BuildingDestroyer>();
+        //BuildingDestroyer dest = obj.GetComponentInParent<BuildingDestroyer>();
 
         if (obj.tag != "BuildingDestroyer")
             return;
