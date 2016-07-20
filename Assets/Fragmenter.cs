@@ -23,6 +23,18 @@ public class Fragmenter : MonoBehaviour {
         }
 	}
 
+    void OnTriggerEnter(Collider col)
+    {
+        GameObject obj = col.gameObject;
+
+        // BuildingDestroyer dest = obj.GetComponentInParent<BuildingDestroyer>();
+
+        if (obj.tag != "BuildingDestroyer")
+            return;
+
+        FragmentNonDelaunay(mesh);
+    }
+
     public class fragment
     {
         public bool boundary = false;
