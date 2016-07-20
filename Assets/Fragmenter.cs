@@ -19,7 +19,18 @@ public class Fragmenter : MonoBehaviour {
 	void Update () {
 	    if(Input.GetKeyDown(KeyCode.F2))
         {
-           FragmentNonDelaunay(mesh);
+            FragmentNonDelaunay(mesh);
+            return;
+        }
+
+        StructureWithIntegrity structure = GetComponentInParent<StructureWithIntegrity>();
+
+        if(structure != null)
+        {
+            if(!structure.isStructurallySound())
+            {
+                FragmentNonDelaunay(mesh);
+            }
         }
 	}
 
