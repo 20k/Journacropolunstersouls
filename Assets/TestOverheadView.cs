@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using UnityStandardAssets.CrossPlatformInput;
+using System.Collections.Generic;
 
 namespace JamesCamera.TestOverheadView
 {
@@ -204,10 +205,10 @@ namespace JamesCamera.TestOverheadView
                     m_Jumping = true;
                 }
 
-                if (!m_Jumping && Mathf.Abs(input.x) < float.Epsilon && Mathf.Abs(input.y) < float.Epsilon && m_RigidBody.velocity.magnitude < 1f)
+                /*if (!m_Jumping && Mathf.Abs(input.x) < float.Epsilon && Mathf.Abs(input.y) < float.Epsilon && m_RigidBody.velocity.magnitude < 1f)
                 {
                     m_RigidBody.Sleep();
-                }
+                }*/
             }
             else
             {
@@ -284,14 +285,56 @@ namespace JamesCamera.TestOverheadView
         /// sphere cast down just beyond the bottom of the capsule to see if the capsule is colliding round the bottom
         private void GroundCheck()
         {
+            Collider[] c1 = GetComponentsInParent<Collider>();
+            Collider[] c2 = GetComponents<Collider>();
+            Collider[] c3 = GetComponentsInChildren<Collider>();
+
+            RaycastHit[] hits = Physics.SphereCastAll(transform.position, m_Capsule.radius * (1.0f - advancedSettings.shellOffset), Vector3.down,
+                                   ((m_Capsule.height / 2f) - m_Capsule.radius) + advancedSettings.groundCheckDistance, ~0, QueryTriggerInteraction.Ignore);
+
+            List<Collider> cList = new List<Collider>();
+            cList.AddRange(c1);
+            cList.AddRange(c2);
+            cList.AddRange(c3);
+
             m_PreviouslyGrounded = m_IsGrounded;
-            RaycastHit hitInfo;
+
+            bool found = false;
+            RaycastHit whichNotMe = new RaycastHit();
+
+            for(int i=0; i<hits.Length; i++)
+            {
+                bool isMe = false;
+
+                for(int j=0; j<cList.Count; j++)
+                {
+                    if(cList[j] == hits[i].collider)
+                    {
+                        isMe = true;
+                        break;
+                    }
+                }
+
+                if(!isMe)
+                {
+                    whichNotMe = hits[i];
+                    found = true;
+                }
+            }
+
+            if(found)
+            {
+                m_IsGrounded = true;
+                m_GroundContactNormal = whichNotMe.normal;
+            }
+
+            /*RaycastHit hitInfo;
             if (Physics.SphereCast(transform.position, m_Capsule.radius * (1.0f - advancedSettings.shellOffset), Vector3.down, out hitInfo,
                                    ((m_Capsule.height / 2f) - m_Capsule.radius) + advancedSettings.groundCheckDistance, ~0, QueryTriggerInteraction.Ignore))
             {
                 m_IsGrounded = true;
                 m_GroundContactNormal = hitInfo.normal;
-            }
+            }*/
             else
             {
                 m_IsGrounded = false;
