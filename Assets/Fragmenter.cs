@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class Fragmenter : MonoBehaviour {
 
     public bool useF2KeyboardControl = false;
-
+    public bool fragmentOnPlayerLeave = false;
 
     MeshFilter filter;
     Mesh mesh;
@@ -33,6 +33,18 @@ public class Fragmenter : MonoBehaviour {
             if(!structure.isStructurallySound() && structure.requestCollapse())
             {
                 FragmentNonDelaunay(mesh);
+                return;
+            }
+        }
+
+        PlayerDetector playerDetector = GetComponentInChildren<PlayerDetector>();
+
+        if(fragmentOnPlayerLeave && playerDetector != null)
+        {
+            if(playerDetector.RequestPlayerJustLeftAction())
+            {
+                FragmentNonDelaunay(mesh);
+                return;
             }
         }
 	}
@@ -531,9 +543,6 @@ public class Fragmenter : MonoBehaviour {
         step.x = Mathf.Abs(max.x - min.x) / nums.x;
         step.y = Mathf.Abs(max.y - min.y) / nums.y;
         step.z = Mathf.Abs(max.z - min.z) / nums.z;
-
-        Debug.Log(min);
-        Debug.Log(max);
 
         for (float y = min.y; y < max.y; y += step.y)
         {
