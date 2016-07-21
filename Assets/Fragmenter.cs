@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 public class Fragmenter : MonoBehaviour {
 
+    public bool useF2KeyboardControl = false;
+
+
     MeshFilter filter;
     Mesh mesh;
     Collider col;
@@ -17,7 +20,7 @@ public class Fragmenter : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-	    if(Input.GetKeyDown(KeyCode.F2))
+	    if(useF2KeyboardControl && Input.GetKeyDown(KeyCode.F2))
         {
             FragmentNonDelaunay(mesh);
             return;
@@ -510,31 +513,27 @@ public class Fragmenter : MonoBehaviour {
 
     void FragmentNonDelaunay(Mesh m)
     {
+        ///bound is in global space
         Bounds bound = mesh.bounds;
 
         Vector3 nums = new Vector3(4, 3, 4);
 
-        //float fragmentWidth = 0.5f;
-        //float fragmentHeight = 0.8f;
-        //float fragmentDepth = 0.5f;
-
         Vector3 min = bound.min;
         Vector3 max = bound.max;
 
-        ///ffs unity, lacking basic vector features
-        //Vector3 step = (max - min) / nums;
-
-
         ///Maybe one day i'll understand why this isn't the * operator
         ///and also why its called scale
-        min.Scale(transform.lossyScale);
-        max.Scale(transform.lossyScale);
+        //min.Scale(transform.lossyScale);
+        //max.Scale(transform.lossyScale);
 
         Vector3 step = new Vector3();
 
         step.x = Mathf.Abs(max.x - min.x) / nums.x;
         step.y = Mathf.Abs(max.y - min.y) / nums.y;
         step.z = Mathf.Abs(max.z - min.z) / nums.z;
+
+        Debug.Log(min);
+        Debug.Log(max);
 
         for (float y = min.y; y < max.y; y += step.y)
         {
@@ -544,7 +543,10 @@ public class Fragmenter : MonoBehaviour {
                 {
                     Vector3 point = new Vector3(x, y, z);
 
-                    Collider[] found = Physics.OverlapSphere(point + gameObject.transform.position, 0.0001f);
+                    Vector3 globalPoint = transform.TransformPoint(point);
+                    Vector3 globalStep = transform.TransformVector(step);
+
+                    Collider[] found = Physics.OverlapSphere(globalPoint, 0.0001f);
 
                     bool foundMine = false;
 
@@ -557,6 +559,8 @@ public class Fragmenter : MonoBehaviour {
                         }
                     }
 
+                    //Debug.Log(point);
+
                     if (!foundMine)
                         continue;
 
@@ -565,8 +569,9 @@ public class Fragmenter : MonoBehaviour {
                     {
                         GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
 
-                        obj.transform.position = point + transform.position + step/2f;
-                        obj.transform.localScale = step * 0.99f;
+                        obj.transform.position = globalPoint + globalStep/2f;
+                        obj.transform.localScale = globalStep * 0.99f;
+                        obj.transform.rotation = transform.rotation;
 
                         Rigidbody body = obj.AddComponent<Rigidbody>();
 
